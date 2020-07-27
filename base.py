@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 
 
 
-# setting up selenium and searching for webelements
+# Setting up selenium
 local_driver = seleniumDriver.caller(constants.url1)
 local_driver.setSelenium()
 # dlaczego tego nie mooge wywolac z poziomu local_drivera ??
@@ -19,37 +19,40 @@ searching_button = local_driver.findMeElement(constants.search_button)
 cookies_consent_button = local_driver.findMeElement(constants.cookies)
 
 
-# checking if user is logged ( doesn't do anything )
+
+# Supposed to check if user is logged (doesn't work)
 user_tab = local_driver.findMeElement(constants.logged_in_button)
-time.sleep(3)
-# trzyma obiekt akcji w tym pliku
 action_holder = local_driver.putCursourAtElement(user_tab, constants.my_driver)
 action_holder.click_and_hold(user_tab)
-time.sleep(3)
 local_driver.eliminateCoursorAtElement(action_holder)
 
-# searching for element(s) and clicking to see all that are promoted
+
+
+# Searching for a given object and clicking to see all that are promoted
 local_driver.clickElement(cookies_consent_button)
 local_driver.clickElement(searcher_box)
 local_driver.putText(searcher_box, constants.object_searched)
 local_driver.clickElement(searching_button)
-### Poniższe powoduje zepsucie i intercepcje
-time.sleep(5)
 see_all_button = local_driver.findMeElement(constants.view_all)
 local_driver.clickElement(see_all_button)
-###
-time.sleep(7)
 
-# Creating child selectors depending on the found results ( not yet )
+
+
+# Creating child selectors depending on the found results
 size_of_table_generated = seleniumDriver.promotedResultsLengthDeterminer()
-size_of_table_generated -= constants.advertisement
-seleniumDriver.childSelectorMaker(size_of_table_generated)
-child_prices_selectors_list = seleniumDriver.childSelectorForPriceMaker(size_of_table_generated)
-prices_table = seleniumDriver.priceTableGenerator(local_driver, child_prices_selectors_list)
-print("prices:", end=" ")
-print(prices_table)
-print("items found:", end=" ")
-print(size_of_table_generated)
+print(f"All auctions found: {size_of_table_generated}")
+print(f"Adverts or auctions without price: {constants.advertisement}")
+child_selectors = seleniumDriver.childSelectorMaker()
+# print(f"Child selectors: {child_selectors}")
+prices_selectors = seleniumDriver.priceSelectorMaker()
+# print(f"Price selectors: {prices_selectors}")
+prices_table = seleniumDriver.priceTableGenerator(local_driver, prices_selectors)
+# print(f"Both child:price selectors: {constants.relevant_auctions_dict}")
+print(f"prices: {prices_table}")
 
-print("d" + 1)
+
+
+# # Force-stopping code
+# print("d" + 1)
+
 local_driver.quitSelenium()

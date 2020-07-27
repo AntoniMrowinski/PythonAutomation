@@ -2,12 +2,12 @@ from selenium import webdriver
 import globalConstants
 from selenium.common.exceptions import NoSuchElementException
 
-
 PATH1 = "C:\Program Files (x86)\chromedriver.exe"
 
 url1 = "https://www.olx.pl"
 
 my_driver = webdriver.Chrome(PATH1)
+
 my_driver.maximize_window()
 
 object_searched = "rower"
@@ -25,12 +25,12 @@ logged_in_button = "#topLoginLink > span"
 results_table = "#body-container > div:nth-child(3) > div"
 
 user_selector = "#topLoginLink > i"
-# user_selector = "#userLoginBox"
 
 table_initial_index = 3
 
 advertisement = 0
 
+relevant_auctions_dict = []
 
 
 

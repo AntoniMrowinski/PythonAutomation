@@ -39,50 +39,58 @@ class caller():
         action.reset_actions()
 
 # do tworzenia selectorów childa w oparciu o ilośc elementów (aukcji) znalezionych podczas wyszukiwania. Tylko promowane
-def childSelectorMaker(list_size):
+def childSelectorMaker():
     child_selector_list = []
-    for i in range(constants.table_initial_index, list_size + constants.table_initial_index):
-        given_child = "#offers_table > tbody > tr:nth-child(" + str(i) + ") > td > div"
-        child_selector_list.append(given_child)
-    # print(child_selector_list)
+    for i in range(0, len(constants.relevant_auctions_dict)):
+        child_selector_list.append(constants.relevant_auctions_dict[i][0])
     return child_selector_list
 
+    child_selector_list = []
+    # for i in range(constants.table_initial_index, list_size + constants.table_initial_index):
+    #     given_child = "#offers_table > tbody > tr:nth-child(" + str(i) + ") > td > div"
+    #     child_selector_list.append(given_child)
+    # # print(child_selector_list)
+    # return child_selector_list
+
 # Do tworzenia selektorów cen childa DZIALA
-def childSelectorForPriceMaker(list_size):
+
+def priceSelectorMaker():
     child_price_selector_list = []
-    for i in range(constants.table_initial_index, list_size + constants.table_initial_index):
-        given_child = "#offers_table > tbody > tr:nth-child(" + str(
-            i) + ") > td > div > table > tbody > tr:nth-child(1) > td.wwnormal.tright.td-price > div > p > strong"
-        child_price_selector_list.append(given_child)
-    # print(child_price_selector_list)
+    for i in range(0, len(constants.relevant_auctions_dict)):
+        child_price_selector_list.append(constants.relevant_auctions_dict[i][1])
     return child_price_selector_list
+
 
 # Do wyciągania cen do tabeli
 def priceTableGenerator(local_driver, child_price_selector_list):
     child_price_list = []
     for i in range(0, len(child_price_selector_list)):
-        # print(child_price_selector_list[i])
         try:
             child_webelement = constants.my_driver.find_element_by_css_selector(child_price_selector_list[i])
+            given_price = child_webelement.text
+            child_price_list.append(given_price)
         except NoSuchElementException:
-            globalConstants.advertisement += 1
-        # print(child_webelement)
-        given_price = child_webelement.text
-        # get_attribute("class=\"price\"")
-        # print(given_price)
-        child_price_list.append(given_price)
-    print(child_price_list)
+            True
     return child_price_list
 
+# Also creates table of relevant objects.
 def promotedResultsLengthDeterminer():
     stop = False
     size = 0
     initial_index = 3
     while stop != True:
         local_selector = "#offers_table > tbody > tr:nth-child(" + str(initial_index) + ") > td > div"
-        size += 1
+        price_selector = "#offers_table > tbody > tr:nth-child(" + str(initial_index) + ") > td > div > table > tbody > tr:nth-child(1) > td.wwnormal.tright.td-price > div > p > strong"
         try:
             my_driver.find_element_by_css_selector(local_selector)
+            try:
+                my_driver.find_element_by_css_selector(price_selector)
+                size += 1
+                # loads a dict with auction selector and price selector
+                constants.relevant_auctions_dict.append([local_selector, price_selector])
+            except NoSuchElementException:
+                True
+                constants.advertisement +=1
         except NoSuchElementException:
             stop = True
         initial_index += 1
