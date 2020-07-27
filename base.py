@@ -7,8 +7,6 @@ from selenium import webdriver
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
 
-
-
 # Setting up selenium
 local_driver = seleniumDriver.caller(constants.url1)
 local_driver.setSelenium()
@@ -38,17 +36,26 @@ local_driver.clickElement(see_all_button)
 
 
 
-# Creating child selectors depending on the found results
-size_of_table_generated = seleniumDriver.promotedResultsLengthDeterminer()
-print(f"All auctions found: {size_of_table_generated}")
+# Information operations:
+size_of_table = seleniumDriver.promotedResultsLengthDeterminer()
+print(f"All auctions found: {size_of_table}")
 print(f"Adverts or auctions without price: {constants.advertisement}")
 child_selectors = seleniumDriver.childSelectorMaker()
 # print(f"Child selectors: {child_selectors}")
 prices_selectors = seleniumDriver.priceSelectorMaker()
 # print(f"Price selectors: {prices_selectors}")
-prices_table = seleniumDriver.priceTableGenerator(local_driver, prices_selectors)
+prices_table = seleniumDriver.priceTableGenerator(prices_selectors)
 # print(f"Both child:price selectors: {constants.relevant_auctions_dict}")
-print(f"prices: {prices_table}")
+# print(f"prices: {prices_table}")
+names_table = seleniumDriver.nameTableGenerator()
+# print(f"titles: {names_table}")
+location_table = seleniumDriver.localisationTableGenerator()
+# print(f"locations: {location_table}")
+total_auctions_table = seleniumDriver.joinTables(names_table,location_table,prices_table, size_of_table)
+# print(f"full table: {total_auctions_table}")
+seleniumDriver.fullTablePrinter(total_auctions_table)
+seleniumDriver.writeToTxt(total_auctions_table)
+
 
 
 

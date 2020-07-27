@@ -5,6 +5,7 @@ import selenium.webdriver as webdriver
 from selenium.common.exceptions import NoSuchElementException
 import constants
 import globalConstants
+import time
 
 
 class caller():
@@ -38,22 +39,14 @@ class caller():
         action.release()
         action.reset_actions()
 
-# do tworzenia selectorów childa w oparciu o ilośc elementów (aukcji) znalezionych podczas wyszukiwania. Tylko promowane
+# Extracts child selectors
 def childSelectorMaker():
     child_selector_list = []
     for i in range(0, len(constants.relevant_auctions_dict)):
         child_selector_list.append(constants.relevant_auctions_dict[i][0])
     return child_selector_list
 
-    child_selector_list = []
-    # for i in range(constants.table_initial_index, list_size + constants.table_initial_index):
-    #     given_child = "#offers_table > tbody > tr:nth-child(" + str(i) + ") > td > div"
-    #     child_selector_list.append(given_child)
-    # # print(child_selector_list)
-    # return child_selector_list
-
-# Do tworzenia selektorów cen childa DZIALA
-
+# Extracts prices selectors
 def priceSelectorMaker():
     child_price_selector_list = []
     for i in range(0, len(constants.relevant_auctions_dict)):
@@ -61,8 +54,8 @@ def priceSelectorMaker():
     return child_price_selector_list
 
 
-# Do wyciągania cen do tabeli
-def priceTableGenerator(local_driver, child_price_selector_list):
+# Extracts prices based on price_selectors
+def priceTableGenerator(child_price_selector_list):
     child_price_list = []
     for i in range(0, len(child_price_selector_list)):
         try:
@@ -73,7 +66,33 @@ def priceTableGenerator(local_driver, child_price_selector_list):
             True
     return child_price_list
 
+# Extracts names
+def nameTableGenerator():
+    child_name_list = []
+    for i in constants.relevant_auctions_indexes:
+        loca_name_selector = "#offers_table > tbody > tr:nth-child(" + str(i) + ") > td > div > table > tbody > tr:nth-child(1) > td.title-cell > div > h3 > a > strong"
+        name_webelement = constants.my_driver.find_element_by_css_selector(loca_name_selector)
+        auction_name = name_webelement.text
+        child_name_list.append(auction_name)
+    return child_name_list
+
+# Extracts locations
+def localisationTableGenerator():
+    child_localisation_list = []
+    for i in constants.relevant_auctions_indexes:
+        loca_name_selector = "#offers_table > tbody > tr:nth-child(" + str(
+            i) + ") > td > div > table > tbody > tr:nth-child(2) > td.bottom-cell > div > p > small:nth-child(1) > span"
+        location_webelement = constants.my_driver.find_element_by_css_selector(loca_name_selector)
+        auction_location = location_webelement.text
+        child_localisation_list.append(auction_location)
+    return child_localisation_list
+
+
 # Also creates table of relevant objects.
+# It checks whether something has a correct main selector, if it does then if it has price.
+# Price and main selector are saved if it is auction, when both conditions are fulfilled.
+# Not fulfilled conditions mean that it's not an auction. If something doesn't have selector, it means that
+# the list is finished.
 def promotedResultsLengthDeterminer():
     stop = False
     size = 0
@@ -88,6 +107,8 @@ def promotedResultsLengthDeterminer():
                 size += 1
                 # loads a dict with auction selector and price selector
                 constants.relevant_auctions_dict.append([local_selector, price_selector])
+                # Extract the indexes of auctions
+                constants.relevant_auctions_indexes.append(initial_index)
             except NoSuchElementException:
                 True
                 constants.advertisement +=1
@@ -95,4 +116,31 @@ def promotedResultsLengthDeterminer():
             stop = True
         initial_index += 1
     return size
+
+# Appends all information into 1 table
+def joinTables(names, locations, prices, size):
+    all_info_table = []
+    for i in range(0, size):
+        all_info_table.append([names[i], locations[i], prices[i]])
+    return all_info_table
+
+def fullTablePrinter(full_table):
+    for i in range(0, len(full_table)):
+        given_auction = ""
+        given_auction += "--- "
+        for j in range(0,3):
+            given_auction += full_table[i][j]
+            if j < 2:
+                given_auction +=  " -- "
+        given_auction += " ---"
+        print(given_auction)
+
+def writeToTxt(full_table):
+    current_date = time.localtime()
+    txt_output = open("searching_results.txt", "wt")
+    txt_output.write(str(current_date))
+    for x in full_table:
+        txt_output.write(str(x))
+        txt_output.write("\n")
+    txt_output.close()
 
