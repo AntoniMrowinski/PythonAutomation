@@ -1,61 +1,47 @@
 import seleniumDriver
 import constants
-import time
-import globalConstants
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium import webdriver
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.common.by import By
-
-# Setting up selenium
-local_driver = seleniumDriver.caller(constants.url1)
-local_driver.setSelenium()
-# dlaczego tego nie mooge wywolac z poziomu local_drivera ??
-constants.my_driver.implicitly_wait(time_to_wait=5)
-searcher_box = local_driver.findMeElement(constants.search_field)
-searching_button = local_driver.findMeElement(constants.search_button)
-cookies_consent_button = local_driver.findMeElement(constants.cookies)
-
-# Supposed to check if user is logged (doesn't work)
-user_tab = local_driver.findMeElement(constants.logged_in_button)
-action_holder = local_driver.putCursourAtElement(user_tab, constants.my_driver)
-action_holder.click_and_hold(user_tab)
-local_driver.eliminateCoursorAtElement(action_holder)
-
-# Searching for a given object and clicking to see all that are promoted
-local_driver.clickElement(cookies_consent_button)
-local_driver.clickElement(searcher_box)
-local_driver.putText(searcher_box, constants.object_searched)
-local_driver.clickElement(searching_button)
-see_all_button = local_driver.findMeElement(constants.view_all)
-local_driver.clickElement(see_all_button)
-
-# Information operations:
-size_of_table = seleniumDriver.promotedResultsLengthDeterminer()
-print(f"All auctions found: {size_of_table}")
-print(f"Adverts or auctions without price: {constants.advertisement}")
-print("\n")
-child_selectors = seleniumDriver.childSelectorMaker()
-# print(f"Child selectors: {child_selectors}")
-prices_selectors = seleniumDriver.priceSelectorMaker()
-# print(f"Price selectors: {prices_selectors}")
-prices_table = seleniumDriver.priceTableGenerator(prices_selectors)
-# print(f"Both child:price selectors: {constants.relevant_auctions_dict}")
-# print(f"prices: {prices_table}")
-names_table = seleniumDriver.nameTableGenerator()
-# print(f"titles: {names_table}")
-location_table = seleniumDriver.localisationTableGenerator()
-# print(f"locations: {location_table}")
-urls_table = seleniumDriver.URLsTableGenerator()
-total_auctions_table = seleniumDriver.joinTables(names_table,location_table,prices_table, size_of_table)
-# print(f"full table: {total_auctions_table}")
-# seleniumDriver.fullTablePrinter(total_auctions_table,1)
-cheapest_auction = seleniumDriver.lowPriceIdentifier(prices_table)
-seleniumDriver.writeToTxt(total_auctions_table, cheapest_auction, names_table, urls_table)
-local_driver.goToPage(urls_table[int(cheapest_auction[1])])
 
 
+# Receiving input from the user:
+seleniumDriver.userInputReception()
 
-# # Force-stopping code
-# print("d" + 1)
-# local_driver.quitSelenium()
+while True:
+    # Setting up selenium:
+    chrome_driver_instance = seleniumDriver.Driver(constants.OLX_URL)
+    chrome_driver_instance.setSelenium()
+    constants.chrome_driver.implicitly_wait(0.1)
+
+    # Receiving relevant WebElements:
+    searcher_box = chrome_driver_instance.findMeElement(constants.SEARCH_BOX)
+    searching_button = chrome_driver_instance.findMeElement(constants.SEARCH_BUTTON)
+    cookies_consent_button = chrome_driver_instance.findMeElement(constants.COOKIES_CONSENT_BUTTON)
+
+    # Checking whether the user is logged in (still in development) and clearing coursor placement:
+    user_tab = chrome_driver_instance.findMeElement(constants.LOGGED_IN_BUTTON)
+    elicit_user_tab_reaction = chrome_driver_instance.putCursourAtElement(user_tab, constants.chrome_driver)
+    elicit_user_tab_reaction.click_and_hold(user_tab)
+    chrome_driver_instance.eliminateCoursorAtElement(elicit_user_tab_reaction)
+
+    # Searching OLX for the search object and clicking to see all that are promoted:
+    # Cookies consent is necessary due to the interception they cause while being displayed.
+    # "See all" button may required multiple attempts of clicking.
+    chrome_driver_instance.clickElement(cookies_consent_button)
+    chrome_driver_instance.clickElement(searcher_box)
+    chrome_driver_instance.putText(searcher_box, constants.object_searched)
+    chrome_driver_instance.clickElement(searching_button)
+    seleniumDriver.seeAllButtonClicker(chrome_driver_instance)
+
+    # Information operations:
+    # Browsing page/pages of the results to search for auctions.
+    # Auctions which are not ads and contain price are saved and put with further information into an array.
+    # The array is printed into the .txt file with the information about the cheapest auction
+    # (not cheaper than the price given by the user)
+    # After processing, the user is directed to the cheapest auction URL
+    #   ! The chromedriver.exe process remains active after closing Chrome manually as the code does not quit selenium !
+    #   ! Quitting selenium would cause closing the page with the cheapest auction found !
+    seleniumDriver.auctionBrowser()
+    ordered_table = seleniumDriver.tableOrderer(constants.relevant_auctions_array)
+    seleniumDriver.writeToTxt(ordered_table)
+    chrome_driver_instance.goToPage(constants.cheapest_auction_url)
+    print(f"\nDone!\n\tGo to searching_results.txt in {constants.TXT_OUTPUT_PATH} to see full results.")
+    break
