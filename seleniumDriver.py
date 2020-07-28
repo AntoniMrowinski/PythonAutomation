@@ -1,24 +1,29 @@
-from constants import my_driver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions
+from constants import chrome_driver
 import selenium.webdriver as webdriver
 from selenium.common.exceptions import NoSuchElementException
 import constants
 import datetime
+import time
 from os.path import join
 
 
-class caller():
+# Driver class holds general methods user for managing used webdriver
+class Driver():
 
     def __init__(self, url_address):
         self.url_address = url_address
 
     def setSelenium(self):
-        my_driver.get(self.url_address)
+        chrome_driver.get(self.url_address)
 
     def quitSelenium(self):
-        my_driver.quit()
+        chrome_driver.quit()
 
     def findMeElement(self, element):
-        located_element = my_driver.find_element_by_css_selector(element)
+        located_element = chrome_driver.find_element_by_css_selector(element)
         return located_element
 
     def putText(self, operational_element, searching_text):
@@ -37,171 +42,289 @@ class caller():
         action.release()
         action.reset_actions()
 
-    def goToPage(self, url_address):
-        my_driver.get(url_address)
+    def goToPage(self, url_address_external):
+        chrome_driver.get(url_address_external)
 
-# Extracts child selectors
-def childSelectorMaker():
-    child_selector_list = []
-    for i in range(0, len(constants.relevant_auctions_tab)):
-        child_selector_list.append(constants.relevant_auctions_tab[i][0])
-    return child_selector_list
 
-# Extracts prices selectors
-def priceSelectorMaker():
-    child_price_selector_list = []
-    for i in range(0, len(constants.relevant_auctions_tab)):
-        child_price_selector_list.append(constants.relevant_auctions_tab[i][1])
-    return child_price_selector_list
-
-# Extracts prices based on price_selectors
-def priceTableGenerator(child_price_selector_list):
-    child_price_list = []
-    for i in range(0, len(child_price_selector_list)):
+# Clicks the "See all" button once or more depending on the reaction of the button
+def seeAllButtonClicker(chrome_driver_instance):
+    while True:
         try:
-            child_webelement = constants.my_driver.find_element_by_css_selector(child_price_selector_list[i])
-            given_price = child_webelement.text
-            child_price_list.append(given_price)
+            see_all_button = chrome_driver_instance.findMeElement(constants.VIEW_ALL_BUTTON)
+            chrome_driver_instance.clickElement(see_all_button)
+            break
         except NoSuchElementException:
             True
-    return child_price_list
 
-# Extracts names
-def nameTableGenerator():
-    child_name_list = []
-    for i in constants.relevant_auctions_indexes:
-        loca_name_selector = "#offers_table > tbody > tr:nth-child(" + str(i) + ") > td > div > table > tbody > tr:nth-child(1) > td.title-cell > div > h3 > a > strong"
-        name_webelement = constants.my_driver.find_element_by_css_selector(loca_name_selector)
-        auction_name = name_webelement.text
-        child_name_list.append(auction_name)
-    return child_name_list
-
-# Extracts locations
-def localisationTableGenerator():
-    child_localisation_list = []
-    for i in constants.relevant_auctions_indexes:
-        loca_name_selector = "#offers_table > tbody > tr:nth-child(" + str(
-            i) + ") > td > div > table > tbody > tr:nth-child(2) > td.bottom-cell > div > p > small:nth-child(1) > span"
-        location_webelement = constants.my_driver.find_element_by_css_selector(loca_name_selector)
-        auction_location = location_webelement.text
-        child_localisation_list.append(auction_location)
-    return child_localisation_list
-
-# Extracts URLs
-def URLsTableGenerator():
-    child_URLs_list = []
-    for i in constants.relevant_auctions_indexes:
-        local_name_selector = "#offers_table > tbody > tr:nth-child(" + str(
-            i) + ") > td > div > table > tbody > tr:nth-child(1) > td.title-cell > div > h3 > a"
-        url_webelement = constants.my_driver.find_element_by_css_selector(local_name_selector)
-        auction_url = url_webelement.get_attribute("href")
-        child_URLs_list.append(auction_url)
-    return child_URLs_list
-
-
-# Also creates table of relevant objects.
-# It checks whether something has a correct main selector, if it does then if it has price.
-# Price and main selector are saved if it is auction, when both conditions are fulfilled.
-# Not fulfilled conditions mean that it's not an auction. If something doesn't have selector, it means that
-# the list is finished.
-def promotedResultsLengthDeterminer():
-    stop = False
-    size = 0
-    initial_index = 3
-    while stop != True:
-        local_selector = "#offers_table > tbody > tr:nth-child(" + str(initial_index) + ") > td > div"
-        price_selector = "#offers_table > tbody > tr:nth-child(" + str(initial_index) + ") > td > div > table > tbody > tr:nth-child(1) > td.wwnormal.tright.td-price > div > p > strong"
+def nextPageButtonClicker(next_page_selector, previous_page):
+    while True:
         try:
-            my_driver.find_element_by_css_selector(local_selector)
-            try:
-                my_driver.find_element_by_css_selector(price_selector)
-                size += 1
-                # loads a dict with auction selector and price selector
-                constants.relevant_auctions_tab.append([local_selector, price_selector])
-                # Extract the indexes of auctions
-                constants.relevant_auctions_indexes.append(initial_index)
-            except NoSuchElementException:
-                True
-                constants.advertisement +=1
+            next_page_button = WebDriverWait(chrome_driver, 5).until(
+                expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, next_page_selector)))
+            print(next_page_selector)
+            new_page = chrome_driver.current_url
+            while previous_page == new_page:
+                next_page_button.click()
+                time.sleep(1)
+                new_page = chrome_driver.current_url
+            break
         except NoSuchElementException:
-            stop = True
-        initial_index += 1
-    return size
+            True
 
-# Appends all information into 1 table
-def joinTables(names, locations, prices, size):
-    all_info_table = []
-    for i in range(0, size):
-        all_info_table.append([names[i], locations[i], prices[i]])
-    return all_info_table
+# Receives input from the user regarding the object searched and the minimal price
+# Minimal price defines the lower price limit for the cheapest auction found.
+def userInputReception():
+    while True:
+        try:
+            constants.object_searched = input("Looking for >> ")
+            break
+        except:
+            print("Cannot search for Null!")
+    while True:
+        try:
+            constants.min_price = input("Minimum price >> ")
+            if "," in str(constants.min_price):
+                print("Use \".\" instead of \",\"!")
+            else:
+                try:
+                    constants.min_price = float(constants.min_price)
+                    break
+                except:
+                    print("Incorrect price format!")
+        except:
+            True
+    print(f"\nSearching for \"{constants.object_searched}\" ...\n\t Do not interrupt the browser!")
 
-# output=1 --> prints line after line
-# outpit=2 --> returns whole table with formated lines
-def fullTablePrinter(full_table, output_version):
+
+# Extracts a price based on a price_selector
+def priceTableGenerator(price_selector):
+    child_webelement = constants.chrome_driver.find_element_by_css_selector(price_selector)
+    auction_price = child_webelement.text
+    return auction_price
+
+
+# Extracts a name of a given auction
+def nameExtractor(index):
+    loca_name_selector = "#offers_table > tbody > tr:nth-child(" + str(index) + ") > td > div > table > tbody >" \
+                                                            " tr:nth-child(1) > td.title-cell > div > h3 > a > strong"
+    name_webelement = constants.chrome_driver.find_element_by_css_selector(loca_name_selector)
+    auction_name = name_webelement.text
+    return auction_name
+
+
+# Extracts a location of a given auction
+def locationExtractor(index):
+    loca_name_selector = "#offers_table > tbody > tr:nth-child(" + str(
+        index) + ") > td > div > table > tbody > tr:nth-child(2) > td.bottom-cell > div > p > small:nth-child(1) > span"
+    location_webelement = constants.chrome_driver.find_element_by_css_selector(loca_name_selector)
+    auction_location = location_webelement.text
+    return auction_location
+
+
+# Extracts an URL of a given auction
+def urlExtractor(index):
+    local_name_selector = "#offers_table > tbody > tr:nth-child(" + str(
+        index) + ") > td > div > table > tbody > tr:nth-child(1) > td.title-cell > div > h3 > a"
+    url_webelement = constants.chrome_driver.find_element_by_css_selector(local_name_selector)
+    auction_url = url_webelement.get_attribute("href")
+    return auction_url
+
+
+# auctionBrowser construes an array of auctions.
+#   The array rows include information about auctions including index, name, price, location, url
+#   Only auctions with prices are added to the final array.
+#   Function creates css selectors of a potential next auction WebElement and it's price WebElement.
+#   If auction exist, it looks for price. If price WebElement cannot be found,
+#   then the auction is omitted in final results table.
+#   If next potential auction WebElement cannot be located, it is checked whether next result page exist.
+#   If yes, it is clicked and browsing continues. If not, the browsing is finished.
+def auctionBrowser():
+    while constants.promoted_results_stop == True:
+        constants.initial_index += 1
+        local_selector = "#offers_table > tbody > tr:nth-child(" + str(constants.initial_index) + ") > td > div"
+        price_selector = "#offers_table > tbody > tr:nth-child(" + str(constants.initial_index) + ") > td > div >" \
+                                    " table > tbody > tr:nth-child(1) > td.wwnormal.tright.td-price > div > p > strong"
+        try:
+            chrome_driver.find_element_by_css_selector(local_selector)
+            try:
+                chrome_driver.find_element_by_css_selector(price_selector)
+                price_check = priceTableGenerator(price_selector)
+                if "Zamienię" in price_check:
+                    auctionBrowser()
+                constants.size += 1
+                dummy_initial_index = constants.initial_index-2
+                right_index = (dummy_initial_index + constants.found_auctions_sum + 1)
+
+                name = nameExtractor(constants.initial_index)
+                price = priceTableGenerator(price_selector)
+                location = locationExtractor(constants.initial_index)
+                url = urlExtractor(constants.initial_index)
+                table_insert = [right_index, name, price, location, url]
+
+                constants.relevant_auctions_array.append(table_insert)
+            except NoSuchElementException:
+                aid_advertisement = constants.advertisement
+                constants.advertisement = aid_advertisement + 1
+        except NoSuchElementException:
+            time.sleep(1)
+            is_there_next_page = browseNextPage()
+            if is_there_next_page == True:
+                constants.found_auctions_sum += (constants.initial_index - 2) - constants.advertisement
+                constants.initial_index = 2
+                constants.advertisement = 0
+            else:
+                constants.promoted_results_stop = False
+                constants.found_auctions_sum += (constants.initial_index - 2) - constants.advertisement
+                constants.initial_index = 2
+                constants.advertisement = 0
+
+
+# Checks whether there is another page.
+#   Requires checking whether there are two following pages due to the presence
+#    of an invisible WebElement that normally causes browsing last results page twice.
+#
+# The function creates selector of a next page WebElement and further next page WebElement.
+#   If there is another page, it is clicked and the function returns true, to signalise presence of the next result page
+#   and readiness for further auction browsing.
+#   If there is no other page, the function returns False to signalise that browsing auctions should end
+def browseNextPage():
+    try:
+        constants.browserNextPage_initial_index += 1
+        constants.next_page_selector = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
+                                       "span:nth-child(" + str(constants.browserNextPage_initial_index) + ") > a"
+        chrome_driver.find_element_by_css_selector(constants.next_page_selector)
+
+        try:
+            constants.browserNextPage_initial_index_assistant += 1
+            constants.next_page_selector_assistant = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
+                                                     "span:nth-child(" + str(
+                constants.browserNextPage_initial_index_assistant) + ") > a"
+            chrome_driver.find_element_by_css_selector(constants.next_page_selector_assistant)
+        except NoSuchElementException:
+            return False
+        current_url = chrome_driver.current_url
+        nextPageButtonClicker(constants.next_page_selector, current_url)
+        return True
+    except NoSuchElementException:
+        return False
+
+
+# Assigns a new array which assigns ordered indexes to the original array of all relevant auctions
+def tableOrderer(full_array):
+    ordered_table = []
+    new_index = 0
+    for item in full_array:
+        item[0] = new_index
+        ordered_table.append(item)
+        new_index +=1
+    return ordered_table
+
+
+# Prints the array of found auctions.
+#   output=1 --> prints line after line
+#   outpit=2 --> returns whole table with formated lines. Used for writing to txt.
+#   The latter doest not include URLs to improve readability of the txt file.
+def fullTablePrinter(full_array, output_version):
     if output_version == 1:
-        for i in range(0, len(full_table)):
+        for i in range(0, len(full_array)):
             given_auction = ""
             given_auction += "--- "
-            for j in range(0,3):
-                given_auction += full_table[i][j]
-                if j < 2:
+            for j in range(0,5):
+                given_auction += str(full_array[i][j])
+                if j < 4:
                     given_auction +=  " -- "
             given_auction += " ---"
             print(given_auction)
     elif output_version == 2:
         txt_format_table = []
-        for i in range(0, len(full_table)):
+        for i in range(0, len(full_array)):
             given_auction = ""
             given_auction += "--- "
-            for j in range(0,3):
-                given_auction += full_table[i][j]
-                if j < 2:
+            for j in range(0,4):
+                given_auction += str(full_array[i][j])
+                if j < 3:
                     given_auction +=  " -- "
             given_auction += " ---"
             txt_format_table.append(given_auction)
         return txt_format_table
 
-def writeToTxt(full_table, cheapest_auction, names_table, urls_table):
-    # chapes auction - [price, index]
-    local_cheapest_auction = cheapest_auction.copy()
-    cheapest_auction_index = int(cheapest_auction[1])
-    txt_output = open(join(constants.file_path, "searching_results.txt"), "wt")
+
+# Prints the information about searching to the searching_results.txt file.
+#   Includes information about time of searching, number of results, auctions themselves, and the cheapest auction.
+def writeToTxt(full_array):
+    txt_output = open(join(constants.TXT_OUTPUT_PATH, "searching_results.txt"), "wt")
+
+    # Prints general searching data:
     current_date = datetime.datetime.now()
-    date_line = "\t" + "Wyszukano " + str(current_date.strftime("%d/%m/%y o %H:%M"))
+    date_line = "\t" + "Searched on " + str(current_date.strftime("%d/%m/%y at %H:%M\n"))
+    found_auctions_line = f"\nFound {len(full_array)} auctions total\n\n"
     txt_output.write(date_line)
-    txt_output.write("\n")
-    auctions_input = fullTablePrinter(full_table, 2)
-    for x in auctions_input:
-        txt_output.write("\n")
-        txt_output.write(str(x))
-        txt_output.write("\n")
-    local_cheapest_auction[1] = names_table[1]
-    local_cheapest_auction[0] = cheapest_auction[0]
-    cheapest_auction_url = urls_table[cheapest_auction_index]
-    txt_output.write(f"\n\nThe chapest auction: ->  \"{local_cheapest_auction[1]}\"  <- Price: {local_cheapest_auction[0]}\n\n\tLink: {cheapest_auction_url}")
+    txt_output.write(found_auctions_line)
+
+    # Prints detailed auction information
+    formatted_auctions_array = fullTablePrinter(full_array, 2)
+    for x in formatted_auctions_array:
+        txt_output.write(f"\n{str(x)}\n")
+
+    # Prints detailed cheapest auction information
+    price_str, name_str, auction_index, limit_imposed_by_the_user = cheapestAuctionInformationFormatter(full_array)
+    txt_output.write("\n\n\nThe lowest-price limit imposed by the user: {} zł\n\nThe chapest auction:\t ---->  \"{}\"  <----\t\tPrice:"
+                     " {} zł\n\nLink:\t{}".format(limit_imposed_by_the_user, name_str, price_str,
+                        constants.cheapest_auction_url))
     txt_output.close()
 
-# Takes out only the number from the price string and makes another table
-def priceFloatExcluder(prices_table):
-    prices_in_numbers = []
-    for i in prices_table:
-        index_of_space = str.index(i, " zł")
-        only_price = i[0:index_of_space]
-        # Z jakiegoś powodu na dole tak musi być, ze robie osobny string ze stringa
-        aid_string1 = str(only_price)
-        aid_string2 = aid_string1.replace(",", ".")
-        only_price = aid_string2.replace(" ", "")
-        prices_in_numbers.append(float(only_price))
-    # Returns floats like 100.0 !!!
-    return prices_in_numbers
 
-def lowPriceIdentifier(prices_table):
-    prices_in_numbers = priceFloatExcluder(prices_table)
-    cheapest = prices_in_numbers[0]
-    for i in range(0, len(prices_in_numbers)):
-        if prices_in_numbers[i] < cheapest:
-            cheapest = prices_in_numbers[i]
-            index_of_cheapest = i
+# Extracts sole values from the price_collumn.
+#   Eliminates " zł" and spaces, turns "," into "." to allow for float parsing
+#   Returns array in a form of [x1.0, x2.0, ...]
+def priceFloatValueExtractor(prices_table):
+    prices_float_values = []
+    # index_of_space = 0
+    for i in prices_table:
+        if "Za darmo" in i:
+           prices_float_values.append(float(0))
+        else:
+            index_of_space = str.index(i, " zł")
+            only_price = i[0:index_of_space]
+            aid_string1 = str(only_price)
+            aid_string2 = aid_string1.replace(",", ".")
+            only_price = aid_string2.replace(" ", "")
+            prices_float_values.append(float(only_price))
+    return prices_float_values
+
+
+# Returns the information about the cheapest auction within the limit initially imposed by the user
+#   Returns array [price, index]
+def cheapestAuctionIdentifier(full_array):
+    extracted_prices_collumn = []
+    prices_above_the_limit = []
+
+    index_of_cheapest = 0
+    for i in range(0, len(full_array)):
+        extracted_prices_collumn.append(full_array[i][2])
+    prices_in_float_values = priceFloatValueExtractor(extracted_prices_collumn)
+    for i in range(0, len(prices_in_float_values)):
+        if prices_in_float_values[i] >= constants.min_price:
+            prices_above_the_limit.append([prices_in_float_values[i],i])
+    cheapest = prices_above_the_limit[0][0]
+    for j in range(1, len(prices_above_the_limit)):
+        if prices_above_the_limit[j][0] < cheapest:
+            cheapest = prices_above_the_limit[j][0]
+            index_of_cheapest = prices_above_the_limit[j][1]
     return [cheapest, index_of_cheapest]
 
+
+# Prepares information about the cheapest auction found by eliminating unnecessary zeros or "."
+def cheapestAuctionInformationFormatter(full_array):
+    cheapest_auction = cheapestAuctionIdentifier(full_array)
+    excluded_index = cheapest_auction[1]
+    limit_imposed_by_the_user = str(constants.min_price)
+    limit_imposed_by_the_user = limit_imposed_by_the_user.strip("0")
+    limit_imposed_by_the_user = limit_imposed_by_the_user.strip(".")
+    price = str(cheapest_auction[0])
+    price = price.strip("0")
+    price = price.strip(".")
+    name = str(full_array[excluded_index][1])
+    constants.cheapest_auction_url = full_array[excluded_index][4]
+    return price, name, excluded_index, limit_imposed_by_the_user
 

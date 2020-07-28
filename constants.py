@@ -1,36 +1,49 @@
 from selenium import webdriver
 
+CHROMEDRIVER_PATH = "C:\\Program Files (x86)\\chromedriver.exe"
 
-file_path = "C:\\Users\\Antoni\\Desktop"
+TXT_OUTPUT_PATH = "C:\\Users\\Antoni\\Desktop"
 
-PATH1 = "C:\\Program Files (x86)\\chromedriver.exe"
+OLX_URL = "https://www.olx.pl"
 
-url1 = "https://www.olx.pl"
+SEARCH_BOX = "#headerSearch"
 
-object_searched = str(input("Looking for >> "))
+SEARCH_BUTTON = "#submit-searchmain"
 
-my_driver = webdriver.Chrome(PATH1)
+VIEW_ALL_BUTTON = "#body-container > div:nth-child(3) > div > div.rel.listHandler > table.fixed.offers.breakword.offers--top.redesigned > tbody > tr:nth-child(1) > td > div > h2 > a > span"
 
-my_driver.maximize_window()
+COOKIES_CONSENT_BUTTON = "#cookiesBar > button"
 
-search_field = "#headerSearch"
+LOGGED_IN_BUTTON = "#topLoginLink > span"
 
-search_button = "#submit-searchmain"
+RESULTS_TABLE = "#body-container > div:nth-child(3) > div"
 
-view_all = "#body-container > div:nth-child(3) > div > div.rel.listHandler > table.fixed.offers.breakword.offers--top.redesigned > tbody > tr:nth-child(1) > td > div > h2 > a > span"
+USER_SELECTOR = "#topLoginLink > i"
 
-cookies = "#cookiesBar > button"
+chrome_driver = webdriver.Chrome(CHROMEDRIVER_PATH)
 
-logged_in_button = "#topLoginLink > span"
+chrome_driver.maximize_window()
 
-results_table = "#body-container > div:nth-child(3) > div"
+browser_total_stop = False
 
-user_selector = "#topLoginLink > i"
+promoted_results_stop = True
 
-table_initial_index = 3
+relevant_auctions_array = []
+
+next_page_selector = ""
+
+cheapest_auction_url = ""
+
+initial_index = 2
+
+size = 0
 
 advertisement = 0
 
-relevant_auctions_tab = []
+min_price = 0
 
-relevant_auctions_indexes = []
+browserNextPage_initial_index = 2
+
+browserNextPage_initial_index_assistant = 3
+
+found_auctions_sum = 0
