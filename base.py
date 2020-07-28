@@ -11,20 +11,16 @@ from selenium.webdriver.common.by import By
 local_driver = seleniumDriver.caller(constants.url1)
 local_driver.setSelenium()
 # dlaczego tego nie mooge wywolac z poziomu local_drivera ??
-constants.my_driver.implicitly_wait(5)
+constants.my_driver.implicitly_wait(time_to_wait=5)
 searcher_box = local_driver.findMeElement(constants.search_field)
 searching_button = local_driver.findMeElement(constants.search_button)
 cookies_consent_button = local_driver.findMeElement(constants.cookies)
-
-
 
 # Supposed to check if user is logged (doesn't work)
 user_tab = local_driver.findMeElement(constants.logged_in_button)
 action_holder = local_driver.putCursourAtElement(user_tab, constants.my_driver)
 action_holder.click_and_hold(user_tab)
 local_driver.eliminateCoursorAtElement(action_holder)
-
-
 
 # Searching for a given object and clicking to see all that are promoted
 local_driver.clickElement(cookies_consent_button)
@@ -34,12 +30,11 @@ local_driver.clickElement(searching_button)
 see_all_button = local_driver.findMeElement(constants.view_all)
 local_driver.clickElement(see_all_button)
 
-
-
 # Information operations:
 size_of_table = seleniumDriver.promotedResultsLengthDeterminer()
 print(f"All auctions found: {size_of_table}")
 print(f"Adverts or auctions without price: {constants.advertisement}")
+print("\n")
 child_selectors = seleniumDriver.childSelectorMaker()
 # print(f"Child selectors: {child_selectors}")
 prices_selectors = seleniumDriver.priceSelectorMaker()
@@ -51,15 +46,16 @@ names_table = seleniumDriver.nameTableGenerator()
 # print(f"titles: {names_table}")
 location_table = seleniumDriver.localisationTableGenerator()
 # print(f"locations: {location_table}")
+urls_table = seleniumDriver.URLsTableGenerator()
 total_auctions_table = seleniumDriver.joinTables(names_table,location_table,prices_table, size_of_table)
 # print(f"full table: {total_auctions_table}")
-seleniumDriver.fullTablePrinter(total_auctions_table)
-seleniumDriver.writeToTxt(total_auctions_table)
-
+# seleniumDriver.fullTablePrinter(total_auctions_table,1)
+cheapest_auction = seleniumDriver.lowPriceIdentifier(prices_table)
+seleniumDriver.writeToTxt(total_auctions_table, cheapest_auction, names_table, urls_table)
+local_driver.goToPage(urls_table[int(cheapest_auction[1])])
 
 
 
 # # Force-stopping code
 # print("d" + 1)
-
-local_driver.quitSelenium()
+# local_driver.quitSelenium()

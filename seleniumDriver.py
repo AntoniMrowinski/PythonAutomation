@@ -1,11 +1,9 @@
 from constants import my_driver
-from constants import object_searched
-from selenium.webdriver.support.ui import WebDriverWait
 import selenium.webdriver as webdriver
 from selenium.common.exceptions import NoSuchElementException
 import constants
-import globalConstants
-import time
+import datetime
+from os.path import join
 
 
 class caller():
@@ -39,20 +37,22 @@ class caller():
         action.release()
         action.reset_actions()
 
+    def goToPage(self, url_address):
+        my_driver.get(url_address)
+
 # Extracts child selectors
 def childSelectorMaker():
     child_selector_list = []
-    for i in range(0, len(constants.relevant_auctions_dict)):
-        child_selector_list.append(constants.relevant_auctions_dict[i][0])
+    for i in range(0, len(constants.relevant_auctions_tab)):
+        child_selector_list.append(constants.relevant_auctions_tab[i][0])
     return child_selector_list
 
 # Extracts prices selectors
 def priceSelectorMaker():
     child_price_selector_list = []
-    for i in range(0, len(constants.relevant_auctions_dict)):
-        child_price_selector_list.append(constants.relevant_auctions_dict[i][1])
+    for i in range(0, len(constants.relevant_auctions_tab)):
+        child_price_selector_list.append(constants.relevant_auctions_tab[i][1])
     return child_price_selector_list
-
 
 # Extracts prices based on price_selectors
 def priceTableGenerator(child_price_selector_list):
@@ -87,6 +87,17 @@ def localisationTableGenerator():
         child_localisation_list.append(auction_location)
     return child_localisation_list
 
+# Extracts URLs
+def URLsTableGenerator():
+    child_URLs_list = []
+    for i in constants.relevant_auctions_indexes:
+        local_name_selector = "#offers_table > tbody > tr:nth-child(" + str(
+            i) + ") > td > div > table > tbody > tr:nth-child(1) > td.title-cell > div > h3 > a"
+        url_webelement = constants.my_driver.find_element_by_css_selector(local_name_selector)
+        auction_url = url_webelement.get_attribute("href")
+        child_URLs_list.append(auction_url)
+    return child_URLs_list
+
 
 # Also creates table of relevant objects.
 # It checks whether something has a correct main selector, if it does then if it has price.
@@ -106,7 +117,7 @@ def promotedResultsLengthDeterminer():
                 my_driver.find_element_by_css_selector(price_selector)
                 size += 1
                 # loads a dict with auction selector and price selector
-                constants.relevant_auctions_dict.append([local_selector, price_selector])
+                constants.relevant_auctions_tab.append([local_selector, price_selector])
                 # Extract the indexes of auctions
                 constants.relevant_auctions_indexes.append(initial_index)
             except NoSuchElementException:
@@ -124,23 +135,73 @@ def joinTables(names, locations, prices, size):
         all_info_table.append([names[i], locations[i], prices[i]])
     return all_info_table
 
-def fullTablePrinter(full_table):
-    for i in range(0, len(full_table)):
-        given_auction = ""
-        given_auction += "--- "
-        for j in range(0,3):
-            given_auction += full_table[i][j]
-            if j < 2:
-                given_auction +=  " -- "
-        given_auction += " ---"
-        print(given_auction)
+# output=1 --> prints line after line
+# outpit=2 --> returns whole table with formated lines
+def fullTablePrinter(full_table, output_version):
+    if output_version == 1:
+        for i in range(0, len(full_table)):
+            given_auction = ""
+            given_auction += "--- "
+            for j in range(0,3):
+                given_auction += full_table[i][j]
+                if j < 2:
+                    given_auction +=  " -- "
+            given_auction += " ---"
+            print(given_auction)
+    elif output_version == 2:
+        txt_format_table = []
+        for i in range(0, len(full_table)):
+            given_auction = ""
+            given_auction += "--- "
+            for j in range(0,3):
+                given_auction += full_table[i][j]
+                if j < 2:
+                    given_auction +=  " -- "
+            given_auction += " ---"
+            txt_format_table.append(given_auction)
+        return txt_format_table
 
-def writeToTxt(full_table):
-    current_date = time.localtime()
-    txt_output = open("searching_results.txt", "wt")
-    txt_output.write(str(current_date))
-    for x in full_table:
+def writeToTxt(full_table, cheapest_auction, names_table, urls_table):
+    # chapes auction - [price, index]
+    local_cheapest_auction = cheapest_auction.copy()
+    cheapest_auction_index = int(cheapest_auction[1])
+    txt_output = open(join(constants.file_path, "searching_results.txt"), "wt")
+    current_date = datetime.datetime.now()
+    date_line = "\t" + "Wyszukano " + str(current_date.strftime("%d/%m/%y o %H:%M"))
+    txt_output.write(date_line)
+    txt_output.write("\n")
+    auctions_input = fullTablePrinter(full_table, 2)
+    for x in auctions_input:
+        txt_output.write("\n")
         txt_output.write(str(x))
         txt_output.write("\n")
+    local_cheapest_auction[1] = names_table[1]
+    local_cheapest_auction[0] = cheapest_auction[0]
+    cheapest_auction_url = urls_table[cheapest_auction_index]
+    txt_output.write(f"\n\nThe chapest auction: ->  \"{local_cheapest_auction[1]}\"  <- Price: {local_cheapest_auction[0]}\n\n\tLink: {cheapest_auction_url}")
     txt_output.close()
+
+# Takes out only the number from the price string and makes another table
+def priceFloatExcluder(prices_table):
+    prices_in_numbers = []
+    for i in prices_table:
+        index_of_space = str.index(i, " zł")
+        only_price = i[0:index_of_space]
+        # Z jakiegoś powodu na dole tak musi być, ze robie osobny string ze stringa
+        aid_string1 = str(only_price)
+        aid_string2 = aid_string1.replace(",", ".")
+        only_price = aid_string2.replace(" ", "")
+        prices_in_numbers.append(float(only_price))
+    # Returns floats like 100.0 !!!
+    return prices_in_numbers
+
+def lowPriceIdentifier(prices_table):
+    prices_in_numbers = priceFloatExcluder(prices_table)
+    cheapest = prices_in_numbers[0]
+    for i in range(0, len(prices_in_numbers)):
+        if prices_in_numbers[i] < cheapest:
+            cheapest = prices_in_numbers[i]
+            index_of_cheapest = i
+    return [cheapest, index_of_cheapest]
+
 
