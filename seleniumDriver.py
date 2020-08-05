@@ -46,13 +46,20 @@ class Driver():
         chrome_driver.get(url_address_external)
 
 
-# Clicks the "See all" button once or more depending on the reaction of the button
-def seeAllButtonClicker(chrome_driver_instance):
+# Clicks the "See all" button once or more depending on the reaction of the button.
+# If is clicked multiple times without reaction, it means that no promoted auctions can be found
+def seeAllButtonClicker(chrome_driver_instance,current_browser):
+    click_cycle = 0
     while True:
         try:
+            click_cycle +=1
+            if click_cycle >= 10:
+                return False
             see_all_button = chrome_driver_instance.findMeElement(constants.VIEW_ALL_BUTTON)
             chrome_driver_instance.clickElement(see_all_button)
-            break
+            current_browser_after_click =  constants.chrome_driver.current_url
+            if current_browser != current_browser_after_click:
+                return True
         except NoSuchElementException:
             True
 
@@ -61,7 +68,6 @@ def nextPageButtonClicker(next_page_selector, previous_page):
         try:
             next_page_button = WebDriverWait(chrome_driver, 5).until(
                 expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, next_page_selector)))
-            print(next_page_selector)
             new_page = chrome_driver.current_url
             while previous_page == new_page:
                 next_page_button.click()
@@ -93,7 +99,32 @@ def userInputReception():
                     print("Incorrect price format!")
         except:
             True
+    while True:
+        try:
+            constants.search_for_promoted_only = input("Only search for promoted auctions [y/n] >> ")
+            if constants.search_for_promoted_only == "":
+                print("Make your choice, please.")
+            elif constants.search_for_promoted_only.lower() != "y" and constants.search_for_promoted_only.lower() != "n":
+                print("Incorrect answer format! Use \"y\" or \"n\".")
+            else:
+                break
+        except:
+            constants.search_for_promoted_only
+            print("Make your choice, please.")
+            True
     print(f"\nSearching for \"{constants.object_searched}\" ...\n\t Do not interrupt the browser!")
+
+def checkNoCommonAuctionsFound():
+    look_cycle = 0
+    while True:
+        try:
+            look_cycle += 1
+            if look_cycle >= 10:
+                return False
+            constants.chrome_driver.find_element_by_css_selector(constants.NO_COMMON_AUCTIONS_FOUND)
+            return True
+        except NoSuchElementException:
+            True
 
 
 # Extracts a price based on a price_selector
@@ -139,6 +170,7 @@ def urlExtractor(index):
 #   If next potential auction WebElement cannot be located, it is checked whether next result page exist.
 #   If yes, it is clicked and browsing continues. If not, the browsing is finished.
 def auctionBrowser():
+    time.sleep(2)
     while constants.promoted_results_stop == True:
         constants.initial_index += 1
         local_selector = "#offers_table > tbody > tr:nth-child(" + str(constants.initial_index) + ") > td > div"
@@ -251,27 +283,36 @@ def fullTablePrinter(full_array, output_version):
 
 # Prints the information about searching to the searching_results.txt file.
 #   Includes information about time of searching, number of results, auctions themselves, and the cheapest auction.
-def writeToTxt(full_array):
-    txt_output = open(join(constants.TXT_OUTPUT_PATH, "searching_results.txt"), "wt")
+def writeToTxt(full_array, no_promoted_auctions_found):
+    if no_promoted_auctions_found == False:
+        txt_output = open(join(constants.TXT_OUTPUT_PATH, "searching_results.txt"), "wt", encoding="utf-8")
 
-    # Prints general searching data:
-    current_date = datetime.datetime.now()
-    date_line = "\t" + "Searched on " + str(current_date.strftime("%d/%m/%y at %H:%M\n"))
-    found_auctions_line = f"\nFound {len(full_array)} auctions total\n\n"
-    txt_output.write(date_line)
-    txt_output.write(found_auctions_line)
+        # Prints general searching data:
+        current_date = datetime.datetime.now()
+        date_line = "\t" + "Searched on " + str(current_date.strftime("%d/%m/%y at %H:%M\n"))
+        found_auctions_line = f"\nFound {len(full_array)} auctions total for \"{constants.object_searched}\"\n\n"
+        txt_output.write(date_line)
+        txt_output.write(found_auctions_line)
 
-    # Prints detailed auction information
-    formatted_auctions_array = fullTablePrinter(full_array, 2)
-    for x in formatted_auctions_array:
-        txt_output.write(f"\n{str(x)}\n")
+        # Prints detailed auction information
+        formatted_auctions_array = fullTablePrinter(full_array, 2)
+        for x in formatted_auctions_array:
+            print(x)
+            txt_output.write(f"\n{str(x)}\n")
 
-    # Prints detailed cheapest auction information
-    price_str, name_str, auction_index, limit_imposed_by_the_user = cheapestAuctionInformationFormatter(full_array)
-    txt_output.write("\n\n\nThe lowest-price limit imposed by the user: {} zł\n\nThe chapest auction:\t ---->  \"{}\"  <----\t\tPrice:"
-                     " {} zł\n\nLink:\t{}".format(limit_imposed_by_the_user, name_str, price_str,
-                        constants.cheapest_auction_url))
-    txt_output.close()
+        # Prints detailed cheapest auction information
+        price_str, name_str, auction_index, limit_imposed_by_the_user = cheapestAuctionInformationFormatter(full_array)
+        txt_output.write("\n\n\nThe lowest-price limit imposed by the user: {} zł\n\nThe chapest auction:\t ---->  \"{}\"  <----\t\tPrice:"
+                         " {} zł\n\nLink:\t{}".format(limit_imposed_by_the_user, name_str, price_str,
+                            constants.cheapest_auction_url))
+        txt_output.close()
+    else:
+        txt_output = open(join(constants.TXT_OUTPUT_PATH, "searching_results.txt"), "wt", encoding="utf-8")
+        current_date = datetime.datetime.now()
+        date_line = "\t" + "Searched on " + str(current_date.strftime("%d/%m/%y at %H:%M\n"))
+        txt_output.write(date_line)
+        no_promoted_auctions_found_message =f"\nSorry! No auctions found for  \"{constants.object_searched}\""
+        txt_output.write(no_promoted_auctions_found_message)
 
 
 # Extracts sole values from the price_collumn.

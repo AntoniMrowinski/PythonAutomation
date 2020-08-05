@@ -29,8 +29,20 @@ while True:
     chrome_driver_instance.clickElement(searcher_box)
     chrome_driver_instance.putText(searcher_box, constants.object_searched)
     chrome_driver_instance.clickElement(searching_button)
-    seleniumDriver.seeAllButtonClicker(chrome_driver_instance)
 
+
+    if constants.search_for_promoted_only == "y":
+        current_browser = constants.chrome_driver.current_url
+        promoted_auctions = seleniumDriver.seeAllButtonClicker(chrome_driver_instance,current_browser)
+        if not promoted_auctions:
+            print("\nNo promoted auctions found.")
+            seleniumDriver.writeToTxt([], True)
+            break
+
+    if seleniumDriver.checkNoCommonAuctionsFound():
+        print("\nNo auctions found.")
+        seleniumDriver.writeToTxt([], True)
+        break
     # Information operations:
     # Browsing page/pages of the results to search for auctions.
     # Auctions which are not ads and contain price are saved and put with further information into an array.
@@ -41,7 +53,8 @@ while True:
     #   ! Quitting selenium would cause closing the page with the cheapest auction found !
     seleniumDriver.auctionBrowser()
     ordered_table = seleniumDriver.tableOrderer(constants.relevant_auctions_array)
-    seleniumDriver.writeToTxt(ordered_table)
+    print(ordered_table)
+    seleniumDriver.writeToTxt(ordered_table, False)
     chrome_driver_instance.goToPage(constants.cheapest_auction_url)
     print(f"\nDone!\n\tGo to searching_results.txt in {constants.TXT_OUTPUT_PATH} to see full results.")
     break

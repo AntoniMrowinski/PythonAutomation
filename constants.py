@@ -20,6 +20,8 @@ RESULTS_TABLE = "#body-container > div:nth-child(3) > div"
 
 USER_SELECTOR = "#topLoginLink > i"
 
+NO_COMMON_AUCTIONS_FOUND = "#body-container > div.wrapper > div > div.emptynew.large.lheight18 > p"
+
 chrome_driver = webdriver.Chrome(CHROMEDRIVER_PATH)
 
 chrome_driver.maximize_window()
@@ -33,6 +35,10 @@ relevant_auctions_array = []
 next_page_selector = ""
 
 cheapest_auction_url = ""
+
+search_for_promoted_only = ""
+
+object_searched = ""
 
 initial_index = 2
 
