@@ -53,3 +53,20 @@ browserNextPage_initial_index = 2
 browserNextPage_initial_index_assistant = 3
 
 found_auctions_sum = 0
+
+gui_row_controller = 4
+
+user_input_array = []
+
+search_obect_input = ""
+
+price_input = 0
+
+promoted_results_input = ""
+
+first_search = True
+
+print("kasuje")
+last_row = 0
+
+initial_limit = 0

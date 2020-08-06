@@ -82,13 +82,13 @@ def nextPageButtonClicker(next_page_selector, previous_page):
 def userInputReception():
     while True:
         try:
-            constants.object_searched = input("Looking for >> ")
+            constants.object_searched = constants.search_obect_input
             break
         except:
             print("Cannot search for Null!")
     while True:
         try:
-            constants.min_price = input("Minimum price >> ")
+            constants.min_price = constants.price_input
             if "," in str(constants.min_price):
                 print("Use \".\" instead of \",\"!")
             else:
@@ -101,7 +101,7 @@ def userInputReception():
             True
     while True:
         try:
-            constants.search_for_promoted_only = input("Only search for promoted auctions [y/n] >> ")
+            constants.search_for_promoted_only = constants.promoted_results_input
             if constants.search_for_promoted_only == "":
                 print("Make your choice, please.")
             elif constants.search_for_promoted_only.lower() != "y" and constants.search_for_promoted_only.lower() != "n":
@@ -198,7 +198,7 @@ def auctionBrowser():
                 aid_advertisement = constants.advertisement
                 constants.advertisement = aid_advertisement + 1
         except NoSuchElementException:
-            time.sleep(1)
+            time.sleep(5)
             is_there_next_page = browseNextPage()
             if is_there_next_page == True:
                 constants.found_auctions_sum += (constants.initial_index - 2) - constants.advertisement
@@ -225,7 +225,6 @@ def browseNextPage():
         constants.next_page_selector = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
                                        "span:nth-child(" + str(constants.browserNextPage_initial_index) + ") > a"
         chrome_driver.find_element_by_css_selector(constants.next_page_selector)
-
         try:
             constants.browserNextPage_initial_index_assistant += 1
             constants.next_page_selector_assistant = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
@@ -297,7 +296,6 @@ def writeToTxt(full_array, no_promoted_auctions_found):
         # Prints detailed auction information
         formatted_auctions_array = fullTablePrinter(full_array, 2)
         for x in formatted_auctions_array:
-            print(x)
             txt_output.write(f"\n{str(x)}\n")
 
         # Prints detailed cheapest auction information
@@ -368,4 +366,3 @@ def cheapestAuctionInformationFormatter(full_array):
     name = str(full_array[excluded_index][1])
     constants.cheapest_auction_url = full_array[excluded_index][4]
     return price, name, excluded_index, limit_imposed_by_the_user
-
