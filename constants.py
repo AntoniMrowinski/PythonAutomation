@@ -46,7 +46,7 @@ size = 0
 
 advertisement = 0
 
-min_price = 0
+min_price = None
 
 browserNextPage_initial_index = 2
 
@@ -79,3 +79,7 @@ results_token = False
 communicate_array = []
 
 results_title_label_array = []
+
+input_consent = [False, False, False]
+
+input_error_warnings = []

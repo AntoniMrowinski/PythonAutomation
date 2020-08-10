@@ -80,39 +80,90 @@ def nextPageButtonClicker(next_page_selector, previous_page):
 # Receives input from the user regarding the object searched and the minimal price
 # Minimal price defines the lower price limit for the cheapest auction found.
 def userInputReception():
-    while True:
-        try:
-            constants.object_searched = constants.search_obect_input
-            break
-        except:
-            print("Cannot search for Null!")
-    while True:
-        try:
-            constants.min_price = constants.price_input
-            if "," in str(constants.min_price):
-                print("Use \".\" instead of \",\"!")
-            else:
-                try:
-                    constants.min_price = float(constants.min_price)
-                    break
-                except:
-                    print("Incorrect price format!")
-        except:
-            True
-    while True:
-        try:
-            constants.search_for_promoted_only = constants.promoted_results_input
-            if constants.search_for_promoted_only == "":
-                print("Make your choice, please.")
-            elif constants.search_for_promoted_only.lower() != "y" and constants.search_for_promoted_only.lower() != "n":
-                print("Incorrect answer format! Use \"y\" or \"n\".")
-            else:
-                break
-        except:
-            constants.search_for_promoted_only
-            print("Make your choice, please.")
-            True
-    print(f"\nSearching for \"{constants.object_searched}\" ...\n\t Do not interrupt the browser!")
+    print("entered input reception")
+    # searching object
+    try:
+        constants.object_searched = constants.search_obect_input
+        print(f"in search object: {constants.object_searched}, origina input: {constants.search_obect_input}")
+        if constants.object_searched == "":
+            constants.input_consent[0] = False
+            constants.input_error_warnings.append([0,0])
+        else:
+            constants.input_consent[0] = True
+    except:
+        constants.input_consent[0] = False
+
+    #price
+    try:
+        constants.min_price = constants.price_input
+        print(f"in price: {constants.min_price}, origina input: {constants.price_input}")
+        if "," in str(constants.min_price):
+            constants.input_consent[1] = False
+            constants.input_error_warnings.append([1,0])
+        else:
+            try:
+                constants.min_price = float(constants.min_price)
+                constants.input_consent[1] = True
+            except:
+                constants.input_error_warnings.append([1,1])
+                constants.input_consent[1] = False
+    except:
+        constants.input_error_warnings.append([1,2])
+        constants.input_consent[0] = False
+
+    #promoted only
+    try:
+        constants.search_for_promoted_only = constants.promoted_results_input
+        print(f"in promotion: {constants.search_for_promoted_only}, origina input: {constants.promoted_results_input}")
+        if constants.search_for_promoted_only == "":
+            constants.input_error_warnings.append([2,0])
+        elif constants.search_for_promoted_only.lower() != "y" and constants.search_for_promoted_only.lower() != "n":
+            constants.input_error_warnings.append([2,1])
+        else:
+            constants.input_consent[2] = True
+    except:
+        constants.input_consent[2] = False
+        constants.input_error_warnings([2,2])
+
+
+    # consent_sum = constants.input_consent[0] and constants.input_consent[1] and constants.input_consent[2]
+    # while consent_sum != True:
+    #     while True:
+    #         try:
+    #             constants.object_searched = constants.search_obect_input
+    #             constants.input_consent[0] = True
+    #             break
+    #         except:
+    #             print("Cannot search for Null!")
+    #     while True:
+    #         try:
+    #             constants.min_price = constants.price_input
+    #             if "," in str(constants.min_price):
+    #                 print("Use \".\" instead of \",\"!")
+    #                 constants.input_consent[1] = True
+    #             else:
+    #                 try:
+    #                     constants.min_price = float(constants.min_price)
+    #                     break
+    #                 except:
+    #                     print("Incorrect price format!")
+    #         except:
+    #             True
+    #     while True:
+    #         try:
+    #             constants.search_for_promoted_only = constants.promoted_results_input
+    #             if constants.search_for_promoted_only == "":
+    #                 print("Make your choice, please.")
+    #             elif constants.search_for_promoted_only.lower() != "y" and constants.search_for_promoted_only.lower() != "n":
+    #                 print("Incorrect answer format! Use \"y\" or \"n\".")
+    #             else:
+    #                 constants.input_consent[2]=True
+    #                 break
+    #         except:
+    #             constants.search_for_promoted_only
+    #             print("Make your choice, please.")
+    #             True
+    # print(f"\nSearching for \"{constants.object_searched}\" ...\n\t Do not interrupt the browser!")
 
 def checkNoCommonAuctionsFound():
     look_cycle = 0

@@ -27,7 +27,6 @@ def variableWipe():
 
 def my_main():
     variableWipe()
-    seleniumDriver.userInputReception()
     while True:
         # Setting up selenium:
         chrome_driver_instance = seleniumDriver.Driver(constants.OLX_URL)
