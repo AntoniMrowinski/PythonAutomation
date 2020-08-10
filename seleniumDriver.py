@@ -1,13 +1,17 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions
-from constants import chrome_driver
+from constants import CHROMEDRIVER_PATH
 import selenium.webdriver as webdriver
 from selenium.common.exceptions import NoSuchElementException
 import constants
 import datetime
 import time
 from os.path import join
+
+chrome_driver = webdriver.Chrome(CHROMEDRIVER_PATH)
+
+chrome_driver.maximize_window()
 
 
 # Driver class holds general methods user for managing used webdriver
@@ -57,7 +61,7 @@ def seeAllButtonClicker(chrome_driver_instance,current_browser):
                 return False
             see_all_button = chrome_driver_instance.findMeElement(constants.VIEW_ALL_BUTTON)
             chrome_driver_instance.clickElement(see_all_button)
-            current_browser_after_click =  constants.chrome_driver.current_url
+            current_browser_after_click =  chrome_driver.current_url
             if current_browser != current_browser_after_click:
                 return True
         except NoSuchElementException:
@@ -81,6 +85,7 @@ def nextPageButtonClicker(next_page_selector, previous_page):
 # Minimal price defines the lower price limit for the cheapest auction found.
 def userInputReception():
     print("entered input reception")
+    constants.input_error_warnings = []
     # searching object
     try:
         constants.object_searched = constants.search_obect_input
@@ -97,7 +102,9 @@ def userInputReception():
     try:
         constants.min_price = constants.price_input
         print(f"in price: {constants.min_price}, origina input: {constants.price_input}")
-        if "," in str(constants.min_price):
+        if constants.min_price == "":
+            constants.input_error_warnings.append([1, 2])
+        elif "," in str(constants.min_price):
             constants.input_consent[1] = False
             constants.input_error_warnings.append([1,0])
         else:
@@ -108,7 +115,6 @@ def userInputReception():
                 constants.input_error_warnings.append([1,1])
                 constants.input_consent[1] = False
     except:
-        constants.input_error_warnings.append([1,2])
         constants.input_consent[0] = False
 
     #promoted only
@@ -123,47 +129,8 @@ def userInputReception():
             constants.input_consent[2] = True
     except:
         constants.input_consent[2] = False
-        constants.input_error_warnings([2,2])
 
 
-    # consent_sum = constants.input_consent[0] and constants.input_consent[1] and constants.input_consent[2]
-    # while consent_sum != True:
-    #     while True:
-    #         try:
-    #             constants.object_searched = constants.search_obect_input
-    #             constants.input_consent[0] = True
-    #             break
-    #         except:
-    #             print("Cannot search for Null!")
-    #     while True:
-    #         try:
-    #             constants.min_price = constants.price_input
-    #             if "," in str(constants.min_price):
-    #                 print("Use \".\" instead of \",\"!")
-    #                 constants.input_consent[1] = True
-    #             else:
-    #                 try:
-    #                     constants.min_price = float(constants.min_price)
-    #                     break
-    #                 except:
-    #                     print("Incorrect price format!")
-    #         except:
-    #             True
-    #     while True:
-    #         try:
-    #             constants.search_for_promoted_only = constants.promoted_results_input
-    #             if constants.search_for_promoted_only == "":
-    #                 print("Make your choice, please.")
-    #             elif constants.search_for_promoted_only.lower() != "y" and constants.search_for_promoted_only.lower() != "n":
-    #                 print("Incorrect answer format! Use \"y\" or \"n\".")
-    #             else:
-    #                 constants.input_consent[2]=True
-    #                 break
-    #         except:
-    #             constants.search_for_promoted_only
-    #             print("Make your choice, please.")
-    #             True
-    # print(f"\nSearching for \"{constants.object_searched}\" ...\n\t Do not interrupt the browser!")
 
 def checkNoCommonAuctionsFound():
     look_cycle = 0
@@ -172,7 +139,7 @@ def checkNoCommonAuctionsFound():
             look_cycle += 1
             if look_cycle >= 10:
                 return False
-            constants.chrome_driver.find_element_by_css_selector(constants.NO_COMMON_AUCTIONS_FOUND)
+            chrome_driver.find_element_by_css_selector(constants.NO_COMMON_AUCTIONS_FOUND)
             return True
         except NoSuchElementException:
             True
@@ -180,7 +147,7 @@ def checkNoCommonAuctionsFound():
 
 # Extracts a price based on a price_selector
 def priceTableGenerator(price_selector):
-    child_webelement = constants.chrome_driver.find_element_by_css_selector(price_selector)
+    child_webelement = chrome_driver.find_element_by_css_selector(price_selector)
     auction_price = child_webelement.text
     return auction_price
 
@@ -189,7 +156,7 @@ def priceTableGenerator(price_selector):
 def nameExtractor(index):
     loca_name_selector = "#offers_table > tbody > tr:nth-child(" + str(index) + ") > td > div > table > tbody >" \
                                                             " tr:nth-child(1) > td.title-cell > div > h3 > a > strong"
-    name_webelement = constants.chrome_driver.find_element_by_css_selector(loca_name_selector)
+    name_webelement = chrome_driver.find_element_by_css_selector(loca_name_selector)
     auction_name = name_webelement.text
     return auction_name
 
@@ -198,7 +165,7 @@ def nameExtractor(index):
 def locationExtractor(index):
     loca_name_selector = "#offers_table > tbody > tr:nth-child(" + str(
         index) + ") > td > div > table > tbody > tr:nth-child(2) > td.bottom-cell > div > p > small:nth-child(1) > span"
-    location_webelement = constants.chrome_driver.find_element_by_css_selector(loca_name_selector)
+    location_webelement = chrome_driver.find_element_by_css_selector(loca_name_selector)
     auction_location = location_webelement.text
     return auction_location
 
@@ -207,7 +174,7 @@ def locationExtractor(index):
 def urlExtractor(index):
     local_name_selector = "#offers_table > tbody > tr:nth-child(" + str(
         index) + ") > td > div > table > tbody > tr:nth-child(1) > td.title-cell > div > h3 > a"
-    url_webelement = constants.chrome_driver.find_element_by_css_selector(local_name_selector)
+    url_webelement = chrome_driver.find_element_by_css_selector(local_name_selector)
     auction_url = url_webelement.get_attribute("href")
     return auction_url
 
@@ -275,12 +242,15 @@ def browseNextPage():
         constants.browserNextPage_initial_index += 1
         constants.next_page_selector = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
                                        "span:nth-child(" + str(constants.browserNextPage_initial_index) + ") > a"
+        print(f"next_page_selector: {constants.next_page_selector}")
         chrome_driver.find_element_by_css_selector(constants.next_page_selector)
+        print("sksk")
         try:
             constants.browserNextPage_initial_index_assistant += 1
             constants.next_page_selector_assistant = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
                                                      "span:nth-child(" + str(
                 constants.browserNextPage_initial_index_assistant) + ") > a"
+            print(f"next_page_selector: {constants.next_page_selector_assistant}")
             chrome_driver.find_element_by_css_selector(constants.next_page_selector_assistant)
         except NoSuchElementException:
             return False
@@ -351,6 +321,7 @@ def writeToTxt(full_array, no_promoted_auctions_found):
 
         # Prints detailed cheapest auction information
         price_str, name_str, auction_index, limit_imposed_by_the_user = cheapestAuctionInformationFormatter(full_array)
+        constants.cheapest_auction_for_gui = cheapestAuctionInformationFormatter(full_array)
         txt_output.write("\n\n\nThe lowest-price limit imposed by the user: {} zł\n\nThe chapest auction:\t ---->  \"{}\"  <----\t\tPrice:"
                          " {} zł\n\nLink:\t{}".format(limit_imposed_by_the_user, name_str, price_str,
                             constants.cheapest_auction_url))

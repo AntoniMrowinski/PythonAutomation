@@ -22,10 +22,6 @@ USER_SELECTOR = "#topLoginLink > i"
 
 NO_COMMON_AUCTIONS_FOUND = "#body-container > div.wrapper > div > div.emptynew.large.lheight18 > p"
 
-chrome_driver = webdriver.Chrome(CHROMEDRIVER_PATH)
-
-chrome_driver.maximize_window()
-
 browser_total_stop = False
 
 promoted_results_stop = True
@@ -83,3 +79,14 @@ results_title_label_array = []
 input_consent = [False, False, False]
 
 input_error_warnings = []
+
+cheapest_auction_for_gui = []
+
+errors_dictionary = {
+    "[0, 0]": "Cannot search for nothing!",
+    "[1, 0]": "Use '.' instead of ','!",
+    "[1, 1]": "Incorrect price format!",
+    "[1, 2]": "No minimal price provided!",
+    "[2, 0]": "No choice regarding promotion!",
+    "[2, 1]": "Promotion choice must be either 'y' or 'n'!"
+}

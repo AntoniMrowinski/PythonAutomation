@@ -2,8 +2,6 @@ from tkinter import *
 import constants
 import base
 import seleniumDriver
-import sys
-
 
 root = Tk()
 root.title("Olx Browser 1.0")
@@ -13,7 +11,7 @@ results_font_size = 11
 font_size = 13
 font_type = "Calibri"
 results_column = 0
-results_row = 5
+results_row = 4
 column_span = 3
 
 search_label_row = 0
@@ -41,6 +39,17 @@ promotion_field_column = 1
 button_field_row = 2
 button_field_column = 2
 
+def inputErrorPrinter():
+    error_text = ""
+    communicateDestroyer()
+    # constants.communicate_array = []
+    for error in constants.input_error_warnings:
+        error_text += constants.errors_dictionary[str(error)] + "\n"
+        errorlabel = Label(root, text=error_text)
+        constants.communicate_array.append(errorlabel)
+    errorlabel.config(font=(font_type, font_size), foreground="red")
+    errorlabel.grid(row=wait_for_searching_row, column=wait_for_searching_column, pady=5, rowspan= 1, columnspan=3)
+    root.update()
 
 def communicateDestroyer():
     for communicate_label in constants.communicate_array:
@@ -57,15 +66,12 @@ def processSygnaliser(full_array):
         constants.promoted_results_input = promoted_field.get()
         seleniumDriver.userInputReception()
         consent_sum = constants.input_consent[0] and constants.input_consent[1] and constants.input_consent[2]
-        #debug printer:
-        for i in constants.input_consent:
-            print(i)
-            print(f"consent_sum: {consent_sum}")
         if consent_sum != True:
+            inputErrorPrinter()
             return False
 
         wait_for_searching_text = Label(root, text=f"Searching for \"{constants.search_obect_input}\"...\n\t"
-                                                   f"Do not interrupt the browser!")
+                                                   f"Do not interrupt the browser!\n")
         constants.communicate_array.append(wait_for_searching_text)
         constants.results_title_label_array.append(wait_for_searching_text)
         wait_for_searching_text.config(font=(font_type, font_size))
@@ -73,7 +79,7 @@ def processSygnaliser(full_array):
         root.update()
         return True
     else:
-        wait_for_searching_text = Label(root, text= f"Done!\n\nFound {len(full_array)} auctions total for \"{constants.object_searched}\"\n\n")
+        wait_for_searching_text = Label(root, text= f"Done!\n\nFound {len(full_array)} auctions total for \"{constants.object_searched}\"\n")
         constants.communicate_array.append(wait_for_searching_text)
         constants.results_title_label_array.append(wait_for_searching_text)
         wait_for_searching_text.config(font=(font_type, font_size))
@@ -89,18 +95,13 @@ def sliderAction1(place_holder):
 
 
 def confirmButton1():
-    # autoResultsDelete()
     constants.results_token = False
     successful_input = processSygnaliser([])
-    print(f"successful_input: {successful_input}")
     if successful_input:
-        print("continuing")
         autoResultsDelete()
-        print("continuing1")
         root.update()
         confirm_button1.configure(state='disabled')
         processSygnaliser([])
-        print("continuing2")
         full_table = base.my_main()
         constants.results_token = True
         drawResults(full_table)
@@ -146,6 +147,13 @@ def drawResults(full_array):
         constants.last_row = constants.gui_row_controller
         space_label = Label(root, text="\n")
         space_label.grid(row=constants.gui_row_controller, column=results_column, columnspan=column_span)
+
+        price_str, name_str, auction_index, limit_imposed_by_the_user = constants.cheapest_auction_for_gui
+        cheapest_auction_insert = "\nThe lowest-price limit imposed by the user: {} zł\n\nThe chapest auction:\t ---->  \"{}\"  <----\n\nPrice:\t{} zł\n\nLink:\t{}\n".format(limit_imposed_by_the_user, name_str, price_str, constants.cheapest_auction_url)
+        cheapest_auction_label = Label(root, text=cheapest_auction_insert, anchor=W)
+        cheapest_auction_label.grid(row=constants.gui_row_controller+1, column=results_column, columnspan=column_span)
+        constants.communicate_array.append(cheapest_auction_label)
+        constants.communicate_array.append(space_label)
         constants.results_array.append(space_label)
         processSygnaliser(full_array)
         constants.results_token = True
@@ -166,7 +174,7 @@ def blankSpaceInserter(blankx,range_limit):
 
 
 search_text = Label(root, text="Search for:")
-search_text.config(font=(font_type, font_size))
+search_text.config(font=(font_type, font_size), relief="flat")
 price_text = Label(root, text="Minimal price:")
 price_text.config(font=(font_type, font_size))
 promotion_text = Label(root, text="Search for promoted ONLY (y\\n): ")
@@ -174,8 +182,8 @@ promotion_text.config(font=(font_type, font_size))
 search_object_field = Entry(root)
 price_field = Entry(root)
 promoted_field = Entry(root)
-confirm_button1 = Button(root, text="Confirm data", command=confirmButton1, padx=5, pady=5, borderwidth=5)
-delete_button = Button(root, text="Delete results", command=deleteOldResults, padx=5, pady=5, borderwidth=5)
+confirm_button1 = Button(root, text="Search", command=confirmButton1, padx=5, pady=5, borderwidth=5)
+delete_button = Button(root, text="Clear Results", command=deleteOldResults, padx=5, pady=5, borderwidth=5)
 delete_button.configure(state='disabled')
 slider = Scale(root, from_=300, to=800, command=sliderAction1)
 

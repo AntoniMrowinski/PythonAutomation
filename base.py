@@ -31,7 +31,7 @@ def my_main():
         # Setting up selenium:
         chrome_driver_instance = seleniumDriver.Driver(constants.OLX_URL)
         chrome_driver_instance.setSelenium()
-        constants.chrome_driver.implicitly_wait(0.1)
+        seleniumDriver.chrome_driver.implicitly_wait(0.1)
 
         # Receiving relevant WebElements:
         searcher_box = chrome_driver_instance.findMeElement(constants.SEARCH_BOX)
@@ -40,7 +40,7 @@ def my_main():
 
         # Checking whether the user is logged in (still in development) and clearing coursor placement:
         user_tab = chrome_driver_instance.findMeElement(constants.LOGGED_IN_BUTTON)
-        elicit_user_tab_reaction = chrome_driver_instance.putCursourAtElement(user_tab, constants.chrome_driver)
+        elicit_user_tab_reaction = chrome_driver_instance.putCursourAtElement(user_tab, seleniumDriver.chrome_driver)
         elicit_user_tab_reaction.click_and_hold(user_tab)
         chrome_driver_instance.eliminateCoursorAtElement(elicit_user_tab_reaction)
 
@@ -56,7 +56,7 @@ def my_main():
 
 
         if constants.search_for_promoted_only == "y":
-            current_browser = constants.chrome_driver.current_url
+            current_browser = seleniumDriver.chrome_driver.current_url
             promoted_auctions = seleniumDriver.seeAllButtonClicker(chrome_driver_instance,current_browser)
             if not promoted_auctions:
                 print("\nNo promoted auctions found.")
