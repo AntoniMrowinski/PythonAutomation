@@ -1,6 +1,5 @@
 import seleniumDriver
 import constants
-from tkinter import mainloop, Tk, Label
 
 # Receiving input from the user:
 #
@@ -19,7 +18,7 @@ def variableWipe():
     constants.browserNextPage_initial_index = 2
     constants.browserNextPage_initial_index_assistant = 3
     constants.found_auctions_sum = 0
-    constants.gui_row_controller = 4
+    # constants.gui_row_controller = 4
     constants.user_input_array = []
     # constants.search_obect_input = ""
     # constants.price_input = 0

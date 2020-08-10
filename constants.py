@@ -60,13 +60,22 @@ user_input_array = []
 
 search_obect_input = ""
 
+results_array = []
+
 price_input = 0
 
 promoted_results_input = ""
 
 first_search = True
 
-print("kasuje")
 last_row = 0
 
 initial_limit = 0
+
+in_process = False
+
+results_token = False
+
+communicate_array = []
+
+results_title_label_array = []
