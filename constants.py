@@ -46,7 +46,11 @@ min_price = None
 
 browserNextPage_initial_index = 2
 
+browserNextPage_initial_index_multiple_results = 3
+
 browserNextPage_initial_index_assistant = 3
+
+browserNextPage_initial_index_assistant_multiple_results = 4
 
 found_auctions_sum = 0
 
@@ -68,19 +72,27 @@ last_row = 0
 
 initial_limit = 0
 
+max_pages_browsed = 12
+
 in_process = False
 
 results_token = False
+
+multiple_pages_search = False
 
 communicate_array = []
 
 results_title_label_array = []
 
-input_consent = [False, False, False]
+# original arrray before checkbox:
+# input_consent = [False, False, False]
+input_consent = [False, False, True]
 
 input_error_warnings = []
 
 cheapest_auction_for_gui = []
+
+multiple_results_check_token = False
 
 errors_dictionary = {
     "[0, 0]": "Cannot search for nothing!",
@@ -90,3 +102,5 @@ errors_dictionary = {
     "[2, 0]": "No choice regarding promotion!",
     "[2, 1]": "Promotion choice must be either 'y' or 'n'!"
 }
+
+potential_page_index = 10

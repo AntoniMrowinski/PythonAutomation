@@ -16,10 +16,17 @@ def variableWipe():
     constants.advertisement = 0
     # constants.min_price = 0
     constants.browserNextPage_initial_index = 2
+    constants.browserNextPage_initial_index_multiple_results = 3
     constants.browserNextPage_initial_index_assistant = 3
+    constants.browserNextPage_initial_index_assistant_multiple_results = 4
+    constants.multiple_pages_search = False
     constants.found_auctions_sum = 0
     # constants.gui_row_controller = 4
     constants.user_input_array = []
+    constants.input_error_warnings.clear()
+    constants.input_error_warnings = []
+    constants.input_consent.clear()
+    constants.input_consent = [False, False, True]
     # constants.search_obect_input = ""
     # constants.price_input = 0
     # constants.promoted_results_input = ""
@@ -55,7 +62,7 @@ def my_main():
         chrome_driver_instance.clickElement(searching_button)
 
 
-        if constants.search_for_promoted_only == "y":
+        if constants.search_for_promoted_only == 1:
             current_browser = seleniumDriver.chrome_driver.current_url
             promoted_auctions = seleniumDriver.seeAllButtonClicker(chrome_driver_instance,current_browser)
             if not promoted_auctions:

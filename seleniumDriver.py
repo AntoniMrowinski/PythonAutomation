@@ -118,18 +118,25 @@ def userInputReception():
         constants.input_consent[0] = False
 
     #promoted only
-    try:
-        constants.search_for_promoted_only = constants.promoted_results_input
-        print(f"in promotion: {constants.search_for_promoted_only}, origina input: {constants.promoted_results_input}")
-        if constants.search_for_promoted_only == "":
-            constants.input_error_warnings.append([2,0])
-        elif constants.search_for_promoted_only.lower() != "y" and constants.search_for_promoted_only.lower() != "n":
-            constants.input_error_warnings.append([2,1])
-        else:
-            constants.input_consent[2] = True
-    except:
-        constants.input_consent[2] = False
-
+    # try:
+    #     constants.search_for_promoted_only = constants.promoted_results_input
+    #     print(f"in promotion: {constants.search_for_promoted_only}, origina input: {constants.promoted_results_input}")
+    #     if constants.search_for_promoted_only == "":
+    #         constants.input_error_warnings.append([2,0])
+    #     elif constants.search_for_promoted_only.lower() != "y" and constants.search_for_promoted_only.lower() != "n":
+    #         constants.input_error_warnings.append([2,1])
+    #     else:
+    #         constants.input_consent[2] = True
+    # except:
+    #     constants.input_consent[2] = False
+    # try:
+    constants.search_for_promoted_only = constants.promoted_results_input
+    #     if constants.search_for_promoted_only == 0:
+    #         constants.input_error_warnings.append([2, 0])
+    #     else:
+    #         constants.input_consent[2] = True
+    # except:
+    #     constants.input_consent[2] = False
 
 
 def checkNoCommonAuctionsFound():
@@ -237,28 +244,67 @@ def auctionBrowser():
 #   If there is another page, it is clicked and the function returns true, to signalise presence of the next result page
 #   and readiness for further auction browsing.
 #   If there is no other page, the function returns False to signalise that browsing auctions should end
-def browseNextPage():
+
+def multipleResultsConfirmation():
     try:
-        constants.browserNextPage_initial_index += 1
-        constants.next_page_selector = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
-                                       "span:nth-child(" + str(constants.browserNextPage_initial_index) + ") > a"
-        print(f"next_page_selector: {constants.next_page_selector}")
-        chrome_driver.find_element_by_css_selector(constants.next_page_selector)
-        print("sksk")
+        potential_page_selector = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
+                                   "span:nth-child(" + str(constants.potential_page_index) + ") > a"
+        chrome_driver.find_element_by_css_selector(potential_page_selector)
+        constants.multiple_results_check_token = True
+        return True
+    except:
+        return False
+
+def browseNextPage():
+    if constants.multiple_results_check_token != True:
+       constants.multiple_pages_search = multipleResultsConfirmation()
+    if constants.multiple_pages_search and constants.browserNextPage_initial_index_multiple_results <= constants.max_pages_browsed:
         try:
-            constants.browserNextPage_initial_index_assistant += 1
-            constants.next_page_selector_assistant = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
-                                                     "span:nth-child(" + str(
-                constants.browserNextPage_initial_index_assistant) + ") > a"
-            print(f"next_page_selector: {constants.next_page_selector_assistant}")
-            chrome_driver.find_element_by_css_selector(constants.next_page_selector_assistant)
+            constants.multiple_results_check_token = True
+            constants.browserNextPage_initial_index_multiple_results += 1
+            constants.next_page_selector = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
+                                           "span:nth-child(" + str(constants.browserNextPage_initial_index_multiple_results) + ") > a"
+            print(f"next_page_selector: {constants.next_page_selector}")
+            chrome_driver.find_element_by_css_selector(constants.next_page_selector)
+            print("sksk")
+            try:
+                constants.browserNextPage_initial_index_assistant_multiple_results += 1
+                constants.next_page_selector_assistant = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
+                                                         "span:nth-child(" + str(
+                    constants.browserNextPage_initial_index_assistant_multiple_results) + ") > a"
+                print(f"next_page_selector: {constants.next_page_selector_assistant}")
+                chrome_driver.find_element_by_css_selector(constants.next_page_selector_assistant)
+            except NoSuchElementException:
+                return False
+            current_url = chrome_driver.current_url
+            nextPageButtonClicker(constants.next_page_selector, current_url)
+            return True
         except NoSuchElementException:
             return False
-        current_url = chrome_driver.current_url
-        nextPageButtonClicker(constants.next_page_selector, current_url)
-        return True
-    except NoSuchElementException:
-        return False
+
+    elif not constants.multiple_pages_search and constants.browserNextPage_initial_index <= (constants.max_pages_browsed-1):
+        try:
+            constants.browserNextPage_initial_index += 1
+            constants.next_page_selector = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
+                                           "span:nth-child(" + str(
+                constants.browserNextPage_initial_index) + ") > a"
+            print(f"next_page_selector: {constants.next_page_selector}")
+            chrome_driver.find_element_by_css_selector(constants.next_page_selector)
+            print("sksk")
+            try:
+                constants.browserNextPage_initial_index_assistant += 1
+                constants.next_page_selector_assistant = "#body-container > div:nth-child(3) > div > div.pager.rel.clr > " \
+                                                         "span:nth-child(" + str(
+                    constants.browserNextPage_initial_index_assistant) + ") > a"
+                print(f"next_page_selector: {constants.next_page_selector_assistant}")
+                chrome_driver.find_element_by_css_selector(constants.next_page_selector_assistant)
+            except NoSuchElementException:
+                return False
+            current_url = chrome_driver.current_url
+            nextPageButtonClicker(constants.next_page_selector, current_url)
+            return True
+        except NoSuchElementException:
+            return False
 
 
 # Assigns a new array which assigns ordered indexes to the original array of all relevant auctions

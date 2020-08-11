@@ -6,6 +6,7 @@ import seleniumDriver
 root = Tk()
 root.title("Olx Browser 1.0")
 root.anchor(NW)
+root.geometry("+10+10")
 
 results_font_size = 11
 font_size = 13
@@ -13,14 +14,12 @@ font_type = "Calibri"
 results_column = 0
 results_row = 4
 column_span = 3
-
 search_label_row = 0
 search_label_column = 3
 price_label_row = 1
 price_label_column = 3
 promoted_label_row = 2
 promoted_label_column = 3
-
 search_text_row = 0
 search_text_column = 0
 price_text_row = 1
@@ -29,7 +28,6 @@ promotion_text_row = 2
 promotion_text_column = 0
 wait_for_searching_row = 4
 wait_for_searching_column = 0
-
 search_field_row = 0
 search_field_column = 1
 price_field_row = 1
@@ -47,8 +45,8 @@ def inputErrorPrinter():
         error_text += constants.errors_dictionary[str(error)] + "\n"
         errorlabel = Label(root, text=error_text)
         constants.communicate_array.append(errorlabel)
-    errorlabel.config(font=(font_type, font_size), foreground="red")
-    errorlabel.grid(row=wait_for_searching_row, column=wait_for_searching_column, pady=5, rowspan= 1, columnspan=3)
+        errorlabel.config(font=(font_type, font_size), foreground="red")
+        errorlabel.grid(row=wait_for_searching_row, column=wait_for_searching_column, pady=5, rowspan= 1, columnspan=3)
     root.update()
 
 def communicateDestroyer():
@@ -63,7 +61,7 @@ def processSygnaliser(full_array):
 
         constants.search_obect_input = search_object_field.get()
         constants.price_input = price_field.get()
-        constants.promoted_results_input = promoted_field.get()
+        constants.promoted_results_input = checkbox_value.get()
         seleniumDriver.userInputReception()
         consent_sum = constants.input_consent[0] and constants.input_consent[1] and constants.input_consent[2]
         if consent_sum != True:
@@ -79,10 +77,13 @@ def processSygnaliser(full_array):
         root.update()
         return True
     else:
-        wait_for_searching_text = Label(root, text= f"Done!\n\nFound {len(full_array)} auctions total for \"{constants.object_searched}\"\n")
+        if len(full_array) > 10:
+            wait_for_searching_text = Label(root, text= f"Done!\nFirst 10 auctions out of {len(full_array)} total for \"{constants.object_searched}\":")
+        else:
+            wait_for_searching_text = Label(root, text= f"Done!\nFound {len(full_array)} auctions total for \"{constants.object_searched}\":")
         constants.communicate_array.append(wait_for_searching_text)
         constants.results_title_label_array.append(wait_for_searching_text)
-        wait_for_searching_text.config(font=(font_type, font_size))
+        wait_for_searching_text.config(font=(font_type, font_size+2), fg="#00CD00")
         wait_for_searching_text.grid(row=wait_for_searching_row, column=wait_for_searching_column, pady=5, rowspan=1, columnspan=3)
         root.update()
         return True
@@ -128,18 +129,25 @@ def deleteOldResults():
         delete_button.configure(state='disabled')
     constants.results_token = False
 
+# def frameDrawer():
+#     place_holder=0
+#     # results_frame = Frame(root, bg='#FFFFFF')
+#     # results_frame.config(highlightbackground="#000000", highlightthickness=1, height=100, width=100, padx=10, pady=10, relief=SOLID)
+#     # results_frame.grid(row=1, columnspan=1)
 
 def drawResults(full_array):
-    blankSpaceInserter(results_row, 6)
+    blankSpaceInserter(results_row, 5)
+    # doesn't work
+    # frameDrawer()
     if full_array == None:
         communicateDestroyer()
         label = Label(root, text="No results found!\n")
         constants.communicate_array.append(label)
-        label.config(font=(font_type, results_font_size))
+        label.config(font=(font_type, 20), fg="#FF0000")
         label.grid(row=constants.gui_row_controller, column=results_column, columnspan=column_span, padx=5)
     else:
-        for element in seleniumDriver.fullTablePrinter(full_array, 2):
-            label = Label(root, text=element)
+        for element in seleniumDriver.fullTablePrinter(full_array, 2)[:10]:
+            label = Label(root, text=element, relief="ridge", borderwidth=2, bg='#FFFFFF', padx=5, pady=5)
             constants.results_array.append(label)
             label.config(font=(font_type, results_font_size))
             label.grid(row=constants.gui_row_controller, column=results_column, columnspan=column_span)
@@ -149,8 +157,13 @@ def drawResults(full_array):
         space_label.grid(row=constants.gui_row_controller, column=results_column, columnspan=column_span)
 
         price_str, name_str, auction_index, limit_imposed_by_the_user = constants.cheapest_auction_for_gui
-        cheapest_auction_insert = "\nThe lowest-price limit imposed by the user: {} zł\n\nThe chapest auction:\t ---->  \"{}\"  <----\n\nPrice:\t{} zł\n\nLink:\t{}\n".format(limit_imposed_by_the_user, name_str, price_str, constants.cheapest_auction_url)
+        cheapest_auction_insert = "The lowest-price limit imposed by the user: {} zł\nThe chapest auction: >>  \"{}\"  << Price: {} zł\n".format(limit_imposed_by_the_user, name_str, price_str)
+        if len(full_array) > 10:
+            cheapest_auction_insert += f"\nGo to searching_results.txt in {constants.TXT_OUTPUT_PATH} to see full results."
+        else:
+            cheapest_auction_insert += f"\nGo to searching_results.txt for other search details."
         cheapest_auction_label = Label(root, text=cheapest_auction_insert, anchor=W)
+        cheapest_auction_label.config(font=(font_type, 15))
         cheapest_auction_label.grid(row=constants.gui_row_controller+1, column=results_column, columnspan=column_span)
         constants.communicate_array.append(cheapest_auction_label)
         constants.communicate_array.append(space_label)
@@ -164,10 +177,10 @@ def blankSpaceInserter(blankx,range_limit):
         linex = Label(root, text=" ")
         linex.grid(row=x, column=0)
         if x == range_limit-1:
-            linex = Label(root, text="Results:\n")
+            linex = Label(root, text="Results:", pady=10)
             constants.results_title_label_array.append(linex)
             constants.communicate_array.append(linex)
-            linex.config(font=(font_type, font_size))
+            linex.config(font=(font_type, 20))
             linex.grid(row=x, column=0, columnspan=column_span)
     constants.gui_row_controller = range_limit
     constants.initial_limit = range_limit
@@ -177,22 +190,28 @@ search_text = Label(root, text="Search for:")
 search_text.config(font=(font_type, font_size), relief="flat")
 price_text = Label(root, text="Minimal price:")
 price_text.config(font=(font_type, font_size))
-promotion_text = Label(root, text="Search for promoted ONLY (y\\n): ")
+promotion_text = Label(root, text="Search for promoted ONLY: ")
 promotion_text.config(font=(font_type, font_size))
 search_object_field = Entry(root)
+search_object_field.config(width=14)
 price_field = Entry(root)
-promoted_field = Entry(root)
+price_field.config(width=14)
+# promoted_field = Entry(root)
+# promoted_field.config(width=10)
+# slider = Scale(root, from_=300, to=800, command=sliderAction1)
+checkbox_value = IntVar()
+promotion_checkbox = Checkbutton(root, variable=checkbox_value)
 confirm_button1 = Button(root, text="Search", command=confirmButton1, padx=5, pady=5, borderwidth=5)
 delete_button = Button(root, text="Clear Results", command=deleteOldResults, padx=5, pady=5, borderwidth=5)
 delete_button.configure(state='disabled')
-slider = Scale(root, from_=300, to=800, command=sliderAction1)
 
 search_text.grid(row=search_text_row, column=search_text_column, padx=5, pady=5)
 price_text.grid(row=price_text_row, column=price_text_column, padx=5, pady=5)
 promotion_text.grid(row=promotion_text_row, column=promotion_text_column, padx=5, pady=5)
 search_object_field.grid(row=search_field_row, column=search_field_column, padx=5, pady=5)
 price_field.grid(row=price_field_row, column=price_field_column, padx=5, pady=5)
-promoted_field.grid(row=promotion_field_row, column=promotion_field_column, padx=5, pady=5)
+promotion_checkbox.grid(row=promotion_field_row, column=promotion_field_column, padx=5, pady=5)
+# promoted_field.grid(row=promotion_field_row, column=promotion_field_column, padx=5, pady=5)
 confirm_button1.grid(row=button_field_row, column=button_field_column, padx=5, pady=5)
 delete_button.grid(row=0, column=2, padx=5, pady=5)
 # slider.grid(row=0, column=4, padx=5, pady=5, columnspan=4)
