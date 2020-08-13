@@ -1,8 +1,15 @@
-from selenium import webdriver
+errors_dictionary = {
+    "[0, 0]": "Cannot search for nothing!",
+    "[1, 0]": "Use '.' instead of ','!",
+    "[1, 1]": "Incorrect price format!",
+    "[1, 2]": "No minimal price provided!",
+    "[2, 0]": "No choice regarding promotion!",
+    "[2, 1]": "Promotion choice must be either 'y' or 'n'!"
+}
 
 CHROMEDRIVER_PATH = "C:\\Program Files (x86)\\chromedriver.exe"
 
-TXT_OUTPUT_PATH = "C:\\Users\\Antoni\\Desktop"
+TXT_OUTPUT_PATH = "D:\\"
 
 OLX_URL = "https://www.olx.pl"
 
@@ -22,11 +29,11 @@ USER_SELECTOR = "#topLoginLink > i"
 
 NO_COMMON_AUCTIONS_FOUND = "#body-container > div.wrapper > div > div.emptynew.large.lheight18 > p"
 
-browser_total_stop = False
+object_searched = ""
 
-promoted_results_stop = True
+promoted_results_input = ""
 
-relevant_auctions_array = []
+search_obect_input = ""
 
 next_page_selector = ""
 
@@ -34,15 +41,51 @@ cheapest_auction_url = ""
 
 search_for_promoted_only = ""
 
-object_searched = ""
+free_text = "Za darmo"
+
+currency_text = " zł"
+
+txt_file_name = "searching_results.txt"
+
+no_auctions_found_text = f"\nSorry! No auctions found for  \"{object_searched}\""
+
+min_price = None
+
+in_process = False
+
+results_token = False
+
+first_search = True
+
+multiple_pages_search = False
+
+browser_total_stop = False
+
+promoted_results_stop = True
+
+multiple_results_check_token = False
+
+input_consent = [False, False, True]
+
+relevant_auctions_array = []
+
+communicate_array = []
+
+results_title_label_array = []
+
+input_error_warnings = []
+
+cheapest_auction_for_gui = []
+
+user_input_array = []
+
+results_array = []
 
 initial_index = 2
 
 size = 0
 
 advertisement = 0
-
-min_price = None
 
 browserNextPage_initial_index = 2
 
@@ -56,51 +99,12 @@ found_auctions_sum = 0
 
 gui_row_controller = 4
 
-user_input_array = []
-
-search_obect_input = ""
-
-results_array = []
-
 price_input = 0
-
-promoted_results_input = ""
-
-first_search = True
 
 last_row = 0
 
 initial_limit = 0
 
 max_pages_browsed = 12
-
-in_process = False
-
-results_token = False
-
-multiple_pages_search = False
-
-communicate_array = []
-
-results_title_label_array = []
-
-# original arrray before checkbox:
-# input_consent = [False, False, False]
-input_consent = [False, False, True]
-
-input_error_warnings = []
-
-cheapest_auction_for_gui = []
-
-multiple_results_check_token = False
-
-errors_dictionary = {
-    "[0, 0]": "Cannot search for nothing!",
-    "[1, 0]": "Use '.' instead of ','!",
-    "[1, 1]": "Incorrect price format!",
-    "[1, 2]": "No minimal price provided!",
-    "[2, 0]": "No choice regarding promotion!",
-    "[2, 1]": "Promotion choice must be either 'y' or 'n'!"
-}
 
 potential_page_index = 10
