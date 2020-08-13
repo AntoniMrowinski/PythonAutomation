@@ -97,11 +97,11 @@ button_field_column = 2
 # The text of an error depends on the input_error_warnings array which is matched with the errors dictionary.
 def inputErrorPrinter():
     error_text = ""
-    communicateDestroyer()
+    promptDestroyer()
     for error in constants.input_error_warnings:
         error_text += constants.errors_dictionary[str(error)] + "\n"
         errorlabel = Label(root, text=error_text)
-        constants.communicate_array.append(errorlabel)
+        constants.prompt_array.append(errorlabel)
         errorlabel.config(font=(font_type, font_size), foreground="red")
         errorlabel.grid(row=wait_for_searching_row, column=wait_for_searching_column, pady=5, rowspan= 1, columnspan=3)
     root.update()
@@ -109,15 +109,15 @@ def inputErrorPrinter():
 
 # Eliminates labels of errors, result title, searching-process label and more.
 # It does not clear the results!
-def communicateDestroyer():
-    for communicate_label in constants.communicate_array:
-        communicate_label.destroy()
+def promptDestroyer():
+    for prompt_label in constants.prompt_array:
+        prompt_label.destroy()
 
 # Prints prompts about on-going searching process or successful completion of this process.
 # If there are more than 10 auctions found, the rest of the results is kept in the searching_results.txt file.
 def processSygnaliser(full_array):
     if not constants.results_token:
-        communicateDestroyer()
+        promptDestroyer()
         constants.search_obect_input = search_object_field.get()
         constants.price_input = price_field.get()
         constants.promoted_results_input = checkbox_value.get()
@@ -128,7 +128,7 @@ def processSygnaliser(full_array):
             return False
         wait_for_searching_text = Label(root, text=f"Searching for \"{constants.search_obect_input}\"...\n\t"
                                                    f"Do not interrupt the browser!\n")
-        constants.communicate_array.append(wait_for_searching_text)
+        constants.prompt_array.append(wait_for_searching_text)
         constants.results_title_label_array.append(wait_for_searching_text)
         wait_for_searching_text.config(font=(font_type, font_size))
         wait_for_searching_text.grid(row=wait_for_searching_row, column=wait_for_searching_column, pady=5, rowspan= 1, columnspan=3)
@@ -139,7 +139,7 @@ def processSygnaliser(full_array):
             wait_for_searching_text = Label(root, text= f"Done!\nFirst 10 auctions out of {len(full_array)} total for \"{constants.object_searched}\":")
         else:
             wait_for_searching_text = Label(root, text= f"Done!\nFound {len(full_array)} auctions total for \"{constants.object_searched}\":")
-        constants.communicate_array.append(wait_for_searching_text)
+        constants.prompt_array.append(wait_for_searching_text)
         constants.results_title_label_array.append(wait_for_searching_text)
         wait_for_searching_text.config(font=(font_type, font_size+2), fg="#00CD00")
         wait_for_searching_text.grid(row=wait_for_searching_row, column=wait_for_searching_column, pady=5, rowspan=1, columnspan=3)
@@ -167,7 +167,7 @@ def confirmButton():
         constants.results_token = True
 
 # Clears current results from in GUI, does not check the presence of the recent results (results_token).
-# Does not delete all communicates as in clearOldResults()
+# Does not delete all prompts as in clearOldResults()
 def autoResultsClearing():
     for label_insert in constants.results_array:
         label_insert.destroy()
@@ -177,13 +177,13 @@ def autoResultsClearing():
     constants.results_token = False
 
 
-# Clears results and communicates in the GUI. Used when the clearing_button is pressed.
+# Clears results and prompts in the GUI. Used when the clearing_button is pressed.
 def clearOldResults():
     if constants.results_token == True:
         # clear_button.configure(state='normal')
         for label_insert in constants.results_array:
             label_insert.destroy()
-        for labels in constants.communicate_array:
+        for labels in constants.prompt_array:
             labels.destroy()
         clear_button.configure(state='disabled')
     constants.results_token = False
@@ -196,9 +196,9 @@ def clearOldResults():
 def drawResults(full_array):
     blankSpaceInserter(results_row, 5)
     if full_array == None:
-        communicateDestroyer()
+        promptDestroyer()
         label = Label(root, text=no_results_text)
-        constants.communicate_array.append(label)
+        constants.prompt_array.append(label)
         label.config(font=(font_type, 20), fg="#FF0000")
         label.grid(row=constants.gui_row_controller, column=results_column, columnspan=column_span, padx=x_spacing)
     else:
@@ -223,14 +223,14 @@ def drawResults(full_array):
         cheapest_auction_label = Label(root, text=cheapest_auction_insert, anchor=W)
         cheapest_auction_label.config(font=(font_type, 15))
         cheapest_auction_label.grid(row=constants.gui_row_controller+1, column=results_column, columnspan=column_span)
-        constants.communicate_array.append(cheapest_auction_label)
-        constants.communicate_array.append(space_label)
+        constants.prompt_array.append(cheapest_auction_label)
+        constants.prompt_array.append(space_label)
         constants.results_array.append(space_label)
         processSygnaliser(full_array)
         constants.results_token = True
         root.update()
 
-# Introduces spacing between the results section and the input/communicate section.
+# Introduces spacing between the results section and the input/prompts section.
 def blankSpaceInserter(blankx,range_limit):
     for x in range(blankx, range_limit):
         linex = Label(root, text=" ")
@@ -238,7 +238,7 @@ def blankSpaceInserter(blankx,range_limit):
         if x == range_limit-1:
             linex = Label(root, text=results_text, pady=10)
             constants.results_title_label_array.append(linex)
-            constants.communicate_array.append(linex)
+            constants.prompt_array.append(linex)
             linex.config(font=(font_type, 20))
             linex.grid(row=x, column=0, columnspan=column_span)
     constants.gui_row_controller = range_limit

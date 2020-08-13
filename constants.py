@@ -69,7 +69,7 @@ input_consent = [False, False, True]
 
 relevant_auctions_array = []
 
-communicate_array = []
+prompt_array = []
 
 results_title_label_array = []
 
