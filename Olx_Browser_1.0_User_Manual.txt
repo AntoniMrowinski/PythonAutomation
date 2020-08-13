@@ -1,0 +1,64 @@
+				Olx Browser 1.0 - User Manual
+
+Olx Browser 1.0 has been created by me, Antoni Mrowiñski, to further practice web automation 
+with the use of Selenium in a form of a practical project. The programme has been written in 
+Python 3.8 and supports Chrome browser.
+
+Olx Browser 1.0 is a programme thats allows a user to find the cheapest auction on the 
+www.OLX.pl website with a desired product.
+
+The software allows for the interaction with the user with the help of the GUI managed 
+through TkInter package. The snapshot of the GUI can be found in Olx_Browser_1.0_Screenshot1.png
+and Olx_Browser_1.0_Screenshot2.png respectively.
+
+
+
+Usage:
+
+1. The user is required to provide name of the searched object.
+
+2. The user is required to provide minimal price of the auction
+	so that the auctions with products of poor quality can be easily filtered out.
+	The format of the price requires using "." instead of "," in case of float value.
+
+3. The user may decide whether she/he wants to search for all auctions or only for the 
+	promoted ones. Placing the tick in the relevant checkbox means that only promoted 
+	auctions will be considered.
+
+4. In order to start the process, the user has to click the Search button. 
+
+5. The browser should not be interrupted during the process as it may results in interceptions
+	while the code and Selenium perform.
+
+6. The results are displayed in a form of a list. Up to 10 results are shown in the GUI. 
+	The rest of the results is stored in the file located in D:\searching_results.txt.
+	If no results are found, an appropriate message is displayed in GUI and in the
+	searching_results.txt file. Having finished the browsing process, the programme
+	goes to the url address of the cheapest auction found. If no such auction is found,
+	the browser is closed but the GUI remains open.
+
+7. The user may also clear the results section by using the Clear Results button. It is active
+	only while results are displayed. 
+
+8. The process of searching with new data may also be repeated. Note that new results
+	 automatically eliminate the old data both from GUI and the searching_results.txt file.
+
+
+
+Additional features:
+
+1. Olx Browser 1.0 can handle input errors such as:
+	- empty input fields
+	- minimal price input containing non-numerical characters
+	- minimal price input where "," is used instead of "." for float values.
+
+2. Olx Browser 1.0 is resistant to pop-up ads which result in the opening of a new tab. Such
+	event will not interrupt the searching process.
+
+
+Required environment:
+- Python 3.8
+- Pycharm Community Edition
+- Selenium 
+- TkInter package
+- access to the chromedriver.exe file (needs to be up-to-date with the Chrome version)
