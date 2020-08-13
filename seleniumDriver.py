@@ -363,7 +363,7 @@ def writeToTxt(full_array, no_promoted_auctions_found):
         try:
             price_str, name_str, auction_index, limit_imposed_by_the_user = cheapestAuctionInformationFormatter(full_array)
             constants.cheapest_auction_for_gui = cheapestAuctionInformationFormatter(full_array)
-            txt_output.write("\n\n\nThe lowest-price limit imposed by the user: {} zł\n\nThe chapest auction:\t ---->  \"{}\"  <----\t\t\nPrice:"
+            txt_output.write("\n\n\nThe lowest-price limit imposed by the user: {} zł\n\nThe chapest auction:\t ---->  \"{}\"  <----\t\t\n\nPrice:"
                             " {} zł\n\nLink:\t{}".format(limit_imposed_by_the_user, name_str, price_str,
                                 constants.cheapest_auction_url))
         except:
